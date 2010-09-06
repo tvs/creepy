@@ -1,0 +1,25 @@
+# Design doc folder
+design-doc/*
+
+# Temporary and build folders
+tmp/*
+bin/*
+log/*.log
+
+# Archive files
+*.tar
+*.gz
+*.zip
+
+# Temporary editor files
+*~
+*.swp
+*.orig
+*.dict
+
+# LaTeX work-files
+*.log
+*.aux
+
+# Random Mac thing
+.DS_Store
