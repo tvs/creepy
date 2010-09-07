@@ -34,6 +34,7 @@ class Robots:
         for rule in self.allowed:
             if rule.match(path):
                 allow = True
+                break # Exit the loop early if we have a match
         
         # Check to be sure it's not explicitly disallowed
         #   Disallows in the event of conflicting rules
@@ -41,6 +42,7 @@ class Robots:
         for rule in self.disallowed:
             if rule.match(path):
                 allow = False
+                break
         
         return allow
     
