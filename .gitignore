@@ -22,4 +22,4 @@ log/*.log
 *.aux
 
 # Random Mac thing
-.DS_Store
+*.DS_Store
