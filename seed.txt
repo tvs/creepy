@@ -1,3 +1,4 @@
+http://en.wikipedia.org/w/index.html
 http://www.amazon.com
 http://www.cnn.com
 http://www.slashdot.org
