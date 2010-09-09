@@ -23,3 +23,6 @@ log/*.log
 
 # Random Mac thing
 *.DS_Store
+
+# Python Compiled
+*.pyc
