@@ -22,7 +22,7 @@ __authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller ‎<miller317@g
 __date__ = "Sep 5, 2010"
 __user_agent__ = "creepybot"
 
-_verbose = 2
+_verbose = False
 _debug = False
 
 class Crawler:
