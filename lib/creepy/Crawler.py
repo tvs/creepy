@@ -15,10 +15,12 @@ except:
 
 from Fetcher import Fetcher
 from Parser import Parser
+from RobotStorage import RobotStorage
 
 __version__ = "0.1"
 __authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller ‎<miller317@gmail.com>‎ and Bhadresh Patel <bhadresh@wsu.edu>"
 __date__ = "Sep 5, 2010"
+__user_agent__ = "creepy"
 
 _verbose = False
 _debug = False
@@ -28,6 +30,7 @@ class Crawler:
         self.crawled = [] # Already Crawled URLs
         self.queue = [] # Crawl Queue
         self.threshold = int(threshold) # Max. Number of Pages to Crawl
+        self.robotstorage = RobotStorage(__user_agent__)
         for url in seed:
             self.queue_url(url)
 
@@ -35,23 +38,30 @@ class Crawler:
         """From the current queue start crawling pages"""
         url = self.get_next_url()
         while url != None:
-            if _verbose > 2:
-                print "  Crawling:", url
-            self.crawled.append(url)
-            page = Fetcher(url)
-            doc = page.get_content()
-            p = Parser(url, doc)
-            links = p.get_links()
-            print "    # links found: ", len(links)
-            self.queue_links(links)
-
-            # Next
-            if self.threshold > 0 and len(self.crawled) >= self.threshold:
+            if self.robotstorage.is_allowed(url):
                 if _verbose > 2:
-                    print "\n###*** Quitting... Threshold reached:", self.threshold, "***###\n"
-                url = None
+                    print "  Crawling:", url
+                self.crawled.append(url)
+                page = Fetcher(url)
+                doc = page.get_content()
+                p = Parser(url, doc)
+                links = p.get_links()
+                print "    # links found: ", len(links)
+                self.queue_links(links)
+
+                # Next
+                if self.threshold > 0 and len(self.crawled) >= self.threshold:
+                    if _verbose > 2:
+                        print "\n###*** Quitting... Threshold reached:", self.threshold, "***###\n"
+                    url = None
+                else:
+                    url = self.get_next_url()
+                
             else:
+                if _verbose > 2:
+                    print "*** URL not allowed:", url
                 url = self.get_next_url()
+    
 
     def get_next_url(self):
         """Get Next url from the queue"""

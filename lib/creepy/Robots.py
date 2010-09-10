@@ -129,5 +129,5 @@ class Robots:
 
 
 if __name__ == '__main__':
-    d = Robots('http://en.wikipedia.org/', 'cuttlefish')
+    d = Robots('http://en.wikipedia.org/', 'creepy')
     print d.is_allowed('http://en.wikipedia.org/w/index.html')
