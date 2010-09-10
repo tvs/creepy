@@ -6,7 +6,7 @@ Connect to domain and request content
 
 import sys
 import urllib2
-_headers = {"User-Agent": "wsubot"}
+_headers = {"User-Agent": "creppybot"}
 
 class Fetcher:
     def __init__(self, url):

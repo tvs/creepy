@@ -20,6 +20,11 @@ log/*.log
 # LaTeX work-files
 *.log
 *.aux
+*.toc
+*.lot
+*.bbl
+*.blg
+*.out
 
 # Random Mac thing
 *.DS_Store
