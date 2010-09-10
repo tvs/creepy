@@ -58,10 +58,6 @@ class Robot:
     # Return a calculation of how much delay_time is remaining based on the time since last
     # request
     def delay_remaining(self, current_time):
-        print "uri: ", self.uri
-        print "last request: ", self.last_request
-        print "delay: ", self.delay
-        print "ct: ", current_time
         d_time = (self.last_request + self.delay) - current_time
         if d_time < 0:
             return 0
