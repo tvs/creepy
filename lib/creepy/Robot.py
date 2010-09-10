@@ -24,6 +24,7 @@ class Robot:
         self.delay = 0
         self.other = {}
         
+        self.last_request = 0
         self._parse_from_uri(uri)
     
     def is_allowed(self, uri):
@@ -54,21 +55,27 @@ class Robot:
     def update_last_request(self, current_time):
         self.last_request = current_time
     
-    # Blocking delay to wait for the next time we're eligibile to request
-    # This is really ugly but I'm not sure where else to put it for now
-    def wait_for_delay(self, current_time):
-        d_time = (self.last_request + delay) - current_time
-        if d_time > 0:
-            time.sleep(d_time)
+    # Return a calculation of how much delay_time is remaining based on the time since last
+    # request
+    def delay_remaining(self, current_time):
+        print "uri: ", self.uri
+        print "last request: ", self.last_request
+        print "delay: ", self.delay
+        print "ct: ", current_time
+        d_time = (self.last_request + self.delay) - current_time
+        if d_time < 0:
+            return 0
+        return d_time
+    
     
     # Protected space
     def _parse_from_uri(self, uri):
-        self.last_request = self.last_looked_at = time.time()
+        self.last_looked_at = time.time()
         robots = Robot._get_robots(uri, self.user_agent, self.opts['timeout'])
         
         # If there's nothing in the string let's just load in a default that's
         # allowed for everything
-        if not (len(robots) > 0):
+        if (robots == None) or (len(robots) == 0):
             robots = "User-agent: *\nAllow: /\n"
         
         self._parse(robots)
@@ -137,3 +144,4 @@ class Robot:
         io = Fetcher(urlparse.urljoin(uri, '/robots.txt'))
         return io.get_content()
     
+

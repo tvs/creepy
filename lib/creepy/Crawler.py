@@ -20,9 +20,9 @@ from RobotStorage import RobotStorage
 __version__ = "0.1"
 __authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller ‎<miller317@gmail.com>‎ and Bhadresh Patel <bhadresh@wsu.edu>"
 __date__ = "Sep 5, 2010"
-__user_agent__ = "creepy"
+__user_agent__ = "creepybot"
 
-_verbose = False
+_verbose = 2
 _debug = False
 
 class Crawler:
@@ -38,10 +38,23 @@ class Crawler:
         """From the current queue start crawling pages"""
         url = self.get_next_url()
         while url != None:
-            if self.robotstorage.is_allowed(url):
+            robot = self.robotstorage.get_robot(url)
+            if robot.is_allowed(url):
+                
+                # Delay processing
+                d_time = robot.delay_remaining(time.time())
+                if d_time > 0:
+                    if _verbose > 2:
+                        print "\n###*** Delaying for %f seconds" % d_time
+                    time.sleep(d_time)
+                
                 if _verbose > 2:
                     print "  Crawling:", url
                 self.crawled.append(url)
+                
+                # Update the last request time
+                robot.update_last_request(time.time())
+                
                 page = Fetcher(url)
                 doc = page.get_content()
                 p = Parser(url, doc)

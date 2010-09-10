@@ -11,11 +11,12 @@ _headers = {"User-Agent": "creepybot"}
 class Fetcher:
     def __init__(self, url):
         self.url = url
-
+    
     def add_headers(self, request):
         for key,value in _headers.iteritems():
             request.add_header(key, value)
-
+    
+    
     def get_content(self):
         content = None
         try:
@@ -30,3 +31,5 @@ class Fetcher:
         except:
             print >> sys.stderr, "*** Error: Could not open url:", self.url
         return content
+    
+
