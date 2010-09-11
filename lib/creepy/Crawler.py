@@ -18,7 +18,7 @@ from Parser import Parser
 from RobotStorage import RobotStorage
 
 __version__ = "0.1"
-__authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller ‎<miller317@gmail.com>‎ and Bhadresh Patel <bhadresh@wsu.edu>"
+__authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller <miller317@gmail.com> and Bhadresh Patel <bhadresh@wsu.edu>"
 __date__ = "Sep 5, 2010"
 __user_agent__ = "creepybot"
 
