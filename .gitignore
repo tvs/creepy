@@ -1,10 +1,10 @@
-# Design doc folder
-design-doc/*
-
 # Temporary and build folders
 tmp/*
 bin/*
 log/*.log
+
+# Data storage folder
+storage/*
 
 # Archive files
 *.tar

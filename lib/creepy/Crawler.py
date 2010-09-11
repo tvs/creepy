@@ -19,6 +19,7 @@ except:
 from Fetcher import Fetcher
 from Parser import Parser
 from RobotStorage import RobotStorage
+from PageStorage import PageStorage
 
 __version__ = "0.1"
 __authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller <miller317@gmail.com> and Bhadresh Patel <bhadresh@wsu.edu>"
@@ -35,6 +36,7 @@ class Crawler:
     def __init__(self, seeds, num_threads=1, threshold=0):
         self.threshold = int(threshold) # Max. Number of Pages to Crawl
         self.robotstorage = RobotStorage(__user_agent__)
+        self.pagestorage = PageStorage()
         self.urllist = [] # List of URLs crawled or in queue
         self.frontier = Queue() # Crawler's Request Queue
         for n in range(num_threads): # Pool of Threads
@@ -70,8 +72,7 @@ class Crawler:
                     page = Fetcher(url, verbose=_verbose)
                     doc = page.get_content()
                     if doc:
-                        # @TODO: Store Page
-
+                        self.pagestorage.store(url, doc)
                         # Parse Page for Links
                         p = Parser(url, doc)
                         links = p.get_links()
