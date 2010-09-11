@@ -12,30 +12,25 @@ _regex = {
 }
 class Parser:
     def __init__(self, url, content):
-        self.surl = urlparse.urlparse(url)
+        self.surl = url # Source URL
         self.links = []
-        try:
+        if content:
             self.parse(content)
-        except:
-            pass
 
     def get_links(self):
         return self.links
 
     def parse(self, content):
-        # Find Links
+        """Parse Web Page Source"""
         for match in _regex['href'].finditer(content):
             url = link = match.group(1)
             p = urlparse.urlparse(link)
-            if p.scheme != 'http' and p.scheme != 'https':
+            if p.scheme != 'http' and p.scheme != 'https': # scheme would be empty for partial URL
                 if p.scheme: # Don't Allow any other protocols
                     continue
-                else:
-                    if p.path.startswith('/'):
-                        url = self.surl.scheme + '://' + self.surl.netloc + p.path
-                    else:
-                        # @TODO: Deal with relative URLs
-                        continue
+                elif p.path and not p.fragment:
+                    # Relative URL from current page (will also take care of url starts with /)
+                    url = urlparse.urljoin(self.surl, link)                    
 
             if url not in self.links:
                 self.links.append(url)

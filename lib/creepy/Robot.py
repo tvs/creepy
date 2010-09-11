@@ -137,7 +137,12 @@ class Robot:
     
     @staticmethod
     def _get_robots(uri, user_agent, timeout):
-        io = Fetcher(urlparse.urljoin(uri, '/robots.txt'))
-        return io.get_content()
+        rtxt = None
+        uri = urlparse.urljoin(uri, '/robots.txt')
+        io = Fetcher(uri)
+        response = io.get_response()        
+        if response and response.headers.type == 'text/plain' and urlparse.urlparse(response.url).path == '/robots.txt': # To prevent redirects to HTML page
+            rtxt = io.get_content()
+        return rtxt
     
 
