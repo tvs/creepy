@@ -30,8 +30,7 @@ class Parser:
                     continue
                 elif p.path and not p.fragment:
                     # Relative URL from current page (will also take care of url starts with /)
-                    url = urlparse.urljoin(self.surl, link)
-                    print p,'***',url
+                    url = urlparse.urljoin(self.surl, link)                    
 
             if url not in self.links:
                 self.links.append(url)
