@@ -5,8 +5,10 @@ CS 453: Project 1 - Web Crawler
 
 import sys
 import time
+
+from Queue import Queue
 import os
-import re
+from threading import Thread
 import urlparse
 try: # Try using psyco JIT compilation!
     import psyco
@@ -30,85 +32,104 @@ class Crawler:
     """
     A simple Web Crawler
     """
-    def __init__(self, seeds, threshold=0):
-        self.crawled = [] # Already Crawled URLs
-        self.frontier = [] # Crawler Request Queue
+    def __init__(self, seeds, num_threads=1, threshold=0):
         self.threshold = int(threshold) # Max. Number of Pages to Crawl
         self.robotstorage = RobotStorage(__user_agent__)
-        for url in seeds:
-            self.queue_url(url)
+        self.urllist = [] # List of URLs crawled or in queue
+        self.frontier = Queue() # Crawler's Request Queue
+        for n in range(num_threads): # Pool of Threads
+            worker = Thread(target=self.crawl, args=(n, ))
+            worker.setDaemon(True)
+            worker.start()
 
-    def crawl(self):
-        """From the current queue start crawling pages"""
-        url = self.get_next_url()
-        while url != None:
-            if _verbose:
-                print "  Crawling:", url
-            robot = self.robotstorage.get_robot(url)
-            if robot.is_allowed(url):                
-                # Delay processing
-                d_time = robot.delay_remaining(time.time())
-                if d_time > 0:
-                    if _verbose > 1:
-                        print "\n###*** Delaying for %f seconds" % d_time
-                    time.sleep(d_time)
-                
-                self.crawled.append(url)
-                
-                # Update the last request time
-                robot.update_last_request(time.time())
-                
-                # Download the Page
-                page = Fetcher(url, verbose=_verbose)
-                doc = page.get_content()                
-                if doc:
-                    # @TODO: Store Document
-                    
-                    # Parse Page for Links
-                    p = Parser(url, doc)
-                    links = p.get_links()
-                    if _verbose:
-                        print "    # links found: ", len(links)
-                    self.queue_links(links)
-            else:
-                if _verbose > 1:
-                    print "*** URL not allowed:", url
-            
-            # Get Next URL
-            if self.threshold > 0 and len(self.crawled) >= self.threshold:
+        for link in seeds:
+            self.queue_url(link)
+        self.frontier.join()
+
+    def crawl(self, tid):
+        """Crawl given URL"""
+        while True:
+            try:
+                url = self.frontier.get()
                 if _verbose:
-                    print "\n###*** Quitting... Threshold reached:", self.threshold, "***###\n"
-                url = None
-            else:
-                url = self.get_next_url()
+                    print "  Crawler #%d: %s" % (tid, url)
 
-    def get_next_url(self):
-        """Get Next url from the queue"""
-        return self.frontier.pop(0) if len(self.frontier) > 0 else None
+                robot = self.robotstorage.get_robot(url)
+                if robot.is_allowed(url):
+                    # Delay processing
+                    d_time = robot.delay_remaining(time.time())
+                    if d_time > 0:
+                        if _verbose > 1:
+                            print "\n###*** Delaying for %f seconds" % d_time
+                        time.sleep(d_time)
+
+                    # Update the last request time
+                    robot.update_last_request(time.time())
+
+                    # Download the Page
+                    page = Fetcher(url, verbose=_verbose)
+                    doc = page.get_content()
+                    if doc:
+                        # @TODO: Store Page
+
+                        # Parse Page for Links
+                        p = Parser(url, doc)
+                        links = p.get_links()
+                        if _verbose > 1:
+                            print "    # links on %s: %d" % (url, len(links))
+                        for link in links:
+                            self.queue_url(link)
+                else:
+                    if _verbose > 1:
+                        print "*** URL not allowed:", url
+            except:
+                pass
+            finally:
+                self.frontier.task_done()
 
     def queue_url(self, url):
         """Add url to the queue for crawling"""
-        if url not in self.crawled and self.validate_url(url):
-            self.frontier.append(url)
-
-    def queue_links(self, links):
-        """Add links to the queue for crawling"""
-        for link in links:
-            self.queue_url(link)
+        if not (self.threshold > 0 and len(self.urllist) >= self.threshold):
+            if url not in self.urllist and self.validate_url(url):
+                self.urllist.append(url)
+                self.frontier.put(url)
 
     def validate_url(self, url):
         """Validate given url"""
         u = urlparse.urlparse(url)
         return u.scheme in ['http', 'https'] and u.netloc and not u.fragment
-        
+
+class Watcher:
+    """Watch for Signal and quit the program"""
+    def __init__(self):
+        self.child = os.fork()
+        if self.child == 0:
+            return
+        else:
+            self.watch()
+
+    def watch(self):
+        try:
+            os.wait()
+        except KeyboardInterrupt:
+            print "Keyboard Interrupted, Quitting..."
+            self.kill()
+        sys.exit()
+
+    def kill(self):
+        try:
+            os.kill(self.child, signal.SIGKILL)
+        except OSError: pass
+
 if __name__ == "__main__":
     import optparse
     parser = optparse.OptionParser(description="Web Crawler",
-                        usage="usage: %prog [options] <seedfile | seeds>",
-                        version=__version__)
+                                   usage="usage: %prog [options] <seedfile | seeds>",
+                                   version=__version__)
     parser.add_option('-v', '--verbose', help="Verbose Output [default: %default]", action="count", default=_verbose)
     parser.add_option('-d', '--debug', help="Debug Mode [default: %default]", action="count", default=_debug)
     parser.add_option('-T', '--page_threshold', help="Max. number of pages to crawl [default: %default]", metavar="THRESHOLD", default=10)
+    parser.add_option('-N', '--num_threads', help="Number of threads to use [default: %default]", metavar="NUM_THREADS", default=1)
 
     (options, args) = parser.parse_args()
     if not args:
@@ -117,6 +138,7 @@ if __name__ == "__main__":
 
     _verbose = options.verbose
     _debug = options.debug
+    Watcher() # Watch for Keyboard Interrupt
 
     seeds = []
     for arg in args:
@@ -134,7 +156,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print "### Number of seeds:", len(seeds)
-    c = Crawler(seeds, options.page_threshold)
-    c.crawl()
-    print "### Number of URLs crawled:", len(c.crawled)
-    print "### Number of URLs pending:", len(c.frontier)
+    c = Crawler(seeds, threshold=int(options.page_threshold), num_threads=int(options.num_threads))
+    print "### Number of URLs crawled:", len(c.urllist)
