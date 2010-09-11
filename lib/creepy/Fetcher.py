@@ -16,7 +16,7 @@ class Fetcher:
             request = urllib2.Request(self.url)
             handle = urllib2.build_opener()
             self.add_headers(request)
-            self.response = handle.open(request)            
+            self.response = handle.open(request)
         except urllib2.HTTPError, e:
             if verbose > 2:
                 print >> sys.stderr, "*** Error:", e
@@ -25,13 +25,13 @@ class Fetcher:
                 print >> sys.stderr, "*** Error: Invalid URL:", e
         except:
             if verbose > 2:
-                print >> sys.stderr, "*** Error: Could not open url:", self.url        
-        
+                print >> sys.stderr, "*** Error: Could not open url:", self.url
+
     def add_headers(self, request):
-        for key,value in _headers.iteritems():
+        for key, value in _headers.iteritems():
             request.add_header(key, value)
-        
-    def get_content(self):        
+
+    def get_content(self):
         content = None
         try:
             if self.response:
@@ -39,8 +39,8 @@ class Fetcher:
         except:
             pass
         return content
-    
+
     def get_response(self):
         return self.response
-    
+
 
