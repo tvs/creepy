@@ -12,7 +12,6 @@ _debug = False
 _clean = False
 _storage = sys.path[0] + "/storage/"
 
-from Crawler import Watcher
 from Crawler import Crawler
 
 if __name__ == "__main__":
@@ -39,8 +38,6 @@ if __name__ == "__main__":
     
     if _clean:
         shutil.rmtree(_storage)
-    
-    Watcher() # Watch for Keyboard Interrupt
 
     seeds = []
     for arg in args:

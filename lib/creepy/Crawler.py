@@ -8,7 +8,7 @@ import time
 import signal
 from Queue import Queue
 import os
-from threading import Thread
+import threading
 import urlparse
 try: # Try using psyco JIT compilation!
     import psyco
@@ -39,8 +39,11 @@ class Crawler:
         self.pagestorage = PageStorage({'store_location': store_loc})
         self.urllist = [] # List of URLs crawled or in queue
         self.frontier = Queue() # Crawler's Request Queue
+        self.watcher = Watcher() # Watch for Keyboard Interrupt
+        self._pagesstored = 0 # Number of pages stored
+        self._lock = threading.Lock()
         for n in range(num_threads): # Pool of Threads
-            worker = Thread(target=self.crawl, args=(n, ))
+            worker = threading.Thread(target=self.crawl, args=(n, ))
             worker.setDaemon(True)
             worker.start()
 
@@ -52,6 +55,10 @@ class Crawler:
         """Crawl given URL"""
         while True:
             try:
+                if self.threshold > 0 and self._pagesstored > self.threshold: 
+                	self.watcher.kill()
+                	break
+                
                 url = self.frontier.get()
                 if self.verbose:
                     print "  Crawler #%d: %s" % (tid, url)
@@ -73,6 +80,12 @@ class Crawler:
                     doc = page.get_content()
                     if doc:
                         self.pagestorage.store(url, doc)
+                        self._lock.acquire()
+                        try:
+							self._pagesstored = self._pagesstored + 1
+                        finally:
+                        	self._lock.release()
+
                         # Parse Page for Links
                         p = Parser(url, doc)
                         links = p.get_links()
@@ -83,17 +96,14 @@ class Crawler:
                 else:
                     if self.verbose > 1:
                         print "*** URL not allowed:", url
-            except:
-                pass
             finally:
                 self.frontier.task_done()
 
     def queue_url(self, url):
         """Add url to the queue for crawling"""
-        if not (self.threshold > 0 and len(self.urllist) >= self.threshold):
-            if url not in self.urllist and self.validate_url(url):
-                self.urllist.append(url)
-                self.frontier.put(url)
+        if url not in self.urllist and self.validate_url(url):
+            self.urllist.append(url)
+            self.frontier.put(url)
 
     def validate_url(self, url):
         """Validate given url"""
