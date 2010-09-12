@@ -4,7 +4,7 @@
 \usepackage{fancyhdr, lastpage}
 \usepackage[pdftex]{graphicx}
 \pdfinfo{
-   /Author (Travis Hall, Brittany Miller and Bhadresh Patel) 
+   /Author (Travis Hall, Brittany Thompson and Bhadresh Patel) 
    /Title (Creepy - Project Report)
 }
 
@@ -33,7 +33,7 @@
 
        \textbf{Travis Hall}\\
        \texttt{trvs.hll@gmail.com}\\[0.5cm]
-       \textbf{Brittany Miller}\\
+       \textbf{Brittany Thompson}\\
        \texttt{miller317@gmail.com}\\[0.5cm]
        \textbf{Bhadresh Patel}\\
        \texttt{bhadresh@wsu.edu}\\[0.5cm]
@@ -49,13 +49,16 @@ The main goal of this project is to design and implement a \emph{web crawler}. T
 \end{abstract}
 
 \section{Overview}
+For project 1, Creepy is designed to be a small scale web crawler in which, given a seed URL, the crawler will collect and store a specified amount of \emph{unique} web pages. The pages are stored as documents and are not modified or deleted. Creepy will crawl a specified threshold, in this case 2500 web pages, each run and store the mapping in another file called pid_map.dat. Like other web crawlers, Creepy is also required to follow certain guidelines. In this case, we followed the same politeness specifications that \emph{Google} is expected to follow. 
+
+For now, Creepy does not mess with page freshness and it ignores any URL that contains \emph{#} or a \emph{?} characters. The \emph{#} character is used to indicate the beginning of a bookmark or anchor. The \emph{?} character makes the URL dynamic and are not ranked the same as other web pages.
 
 \section{Automation}
 
 \section{Document Storage}
-One part of this project is to be able to join the URL with its corresponding data. To do this, the documents retrieved by the crawler are put into a dictionary with the matching URL as the key. The documents are then renamed and written directly to the disk in a specified folder defaulted to ‘storage/’. File names are based on the URL, which by design, makes the file names unique. And, with using a default filter from the Django library, the file names are turned into normalized strings with all lower case letters and all the non-alpha numeric characters removed to make sure that it is a valid file name in the operating system. Once a preset number (default of a thousand) is reached or the crawler is finished, the dictionary is then dumped, keys and file names, into a file called ‘pid_map.dat’
+One part of this project is to be able to join the URL with its corresponding data. To do this, the documents retrieved by Creepy are put into a dictionary with the matching URL as the key. The documents are then renamed and written directly to the disk in a specified folder defaulted to \emph{storage}. File names are based on the URL, which by design, makes the file names unique. And, with using a default filter from the \emph{Django library}, the file names are turned into normalized strings with all lower case letters and all the non-alpha numeric characters removed to make sure that it is a valid file name in the operating system. Once a preset number (default of a thousand) is reached or Creepy is finished, the dictionary is then dumped, keys and file names, into a file called \emph{pid_map.dat}.
 
-On the on hand, at the moment, a dictionary is a little superfluous. It is not being used to guarantee that items are unique, only a way to gather the documents into a file. However, it may be useful later on and it also acts as a secondary method to catch URL duplication.
+On the on hand, at the moment, a dictionary is a little superfluous. It is not being used to guarantee that items are unique, only a way to gather the documents into a file. However, it may be useful later on and it could also act as a secondary method to catch URL duplication if we do not dump dictionary in small chunks.
 
 \section{Politeness}
 When implementing the politeness standards, one of the things we really wanted to do was create a nice, reusable and generic library for the politeness standards. To this end, the module is designed such that you simply create a \emph{Robot} object for a domain and then query whether or not you are allowed to access a URI. In order to ensure that \emph{robots.txt} does not go stale, the programmer can pass along an `expires\_in' value. When the \emph{Robot} is queried, it will then check whether the file is expired and automatically re-fetch and parse it when that is the case.
