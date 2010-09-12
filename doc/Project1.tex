@@ -14,7 +14,7 @@
 \fancyhead{}
 \fancyfoot{}
 \fancyhead[RO,RE] {Project Report: \emph{Creepy - Web Crawler}}
-\fancyfoot[CO,CE] {CS 453: Project 1 - Crawling the Web}
+\fancyfoot[LO,LE] {CS 453: Project 1 - Crawling the Web}
 \fancyfoot[RO,RE] {Page \thepage\ of \pageref{LastPage}}
 \renewcommand{\headrulewidth}{0.5pt}
 \renewcommand{\footrulewidth}{0.5pt}
@@ -49,10 +49,14 @@ The main goal of this project is to design and implement a \emph{web crawler}. T
 \end{abstract}
 
 \section{Overview}
+\emph{Creepy} is simple web crawler written in python. It can take set of seed URLs as input or a file that contains seed URLs and start crawling the web. The crawling can be controlled by page threshold and it will stop crawling after given number of page threshold reached. 
 
 \section{Automation}
+Initially, the seeds are added to the crawler's URL request queue, or \emph{frontier}. The crawler starts fetching pages from the request queue. Once the page is downloaded, it parses links from the page and add them to the request queue. This process continues until the given number of page threshold is reached or the request queue is empty.
 
 \section{Document Storage}
+One part of this project is to be able to join the URL with its corresponding data. To do this, the documents retrieved by the crawler are put into a dictionary with the matching URL as the key. The documents are then renamed and written directly to the disk in a specified folder defaulted to ‘storage/’. File names are based on the URL, which by design, makes the file names unique. And, with using a default filter from the Django library, the file names are turned into normalized strings with all lower case letters and all the non-alpha numeric characters removed to make sure that it is a valid file name in the operating system. Once a preset number (default of a thousand) is reached or the crawler is finished, the dictionary is then dumped, keys and file names, into a file called ‘pid\_map.dat’
+On the on hand, at the moment, a dictionary is a little superfluous. It is not being used to guarantee that items are unique, only a way to gather the documents into a file. However, it may be useful later on and it also acts as a secondary method to catch URL duplication.
 
 \section{Politeness}
 When implementing the politeness standards, one of the things we really wanted to do was create a nice, reusable and generic library for the politeness standards. To this end, the module is designed such that you simply create a \emph{Robot} object for a domain and then query whether or not you are allowed to access a URI. In order to ensure that \emph{robots.txt} does not go stale, the programmer can pass along an `expires\_in' value. When the \emph{Robot} is queried, it will then check whether the file is expired and automatically re-fetch and parse it when that is the case.
@@ -62,13 +66,17 @@ However, we also needed to design towards the state of the project as a whole, a
 Sadly, the \emph{Robot} does not obey the extended standards for \emph{robots.txt}. Though it certainly will parse out that information, it will be stored in the `other' field and is unused unless specifically programmed for. This means that information like `Visit-time', `Request-rate', and `Comment' are largely left ignored. This is not to say that it cannot be extended to obey them, but we had not discovered the extended standard until after the parser was already written and in use.
 
 \section{Duplicate Detection}
+The crawler keep list of the URLs already crawled or is in the queue. When any URL is added to the frontier, it is first checked against all URLs already crawled or is in queue. If same URL is found, the newly requested URL is skipped for crawling. This way we can avoid crawling duplicate URL and store the page only once.
+
+\section{Threaded Crawler}
+Initially we started the project with the simple single threaded crawler, but later we were able to implement multi-threaded version. So now the crawler can take arguments as number of threads to start, if not passed then assumes single thread. The crawler, starts given number of threads first and takes the task from the crawler request queue. The URLs are added to the global queue and each threads takes url from the queue and start crawling the page. This is simple implementation where, for a given URL whole task i.e. downloading the page, storage, and parsing is done by a thread. So the downloading page and parsing it is not done in separate threads. 
 
 \section{Roles}
 
 \begin{description}
- \item[Travis Hall] Politeness standards, project management (Git/Github)
- \item[Brittany Miller] ... 
- \item[Bhadresh Patel] ...
+ \item[Travis Hall] Politeness standards, project management (Git/Github), tweak page storage.
+ \item[Brittany Miller] Initial page storage code.
+ \item[Bhadresh Patel] Main Crawler script, Parser - parse links from HTML page, Fetcher - connects and download pages, Threaded Crawler - crawler with multi threading support.
 \end{description}
 
 \end{document}
