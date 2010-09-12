@@ -1,0 +1,53 @@
+= Creepy
+
+== DESCRIPTION
+Creepy is a web crawler written in Python that reads in a list of seeds and branches out from there, scavenging the web until it has collecting some specified number of webpages.
+
+== RUNNING
+<tt>$ creepy.py [options] <seed></tt>
+
+Options:
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -v, --verbose         Verbose Output [default: False]
+  -d, --debug           Debug Mode [default: False]
+  -O STORAGE, --output=STORAGE
+                        Output location for stored files [default:
+                        /Users/trhall/Schoolwork/webdata/creepy/storage/]
+  -T THRESHOLD, --page_threshold=THRESHOLD
+                        Max. number of pages to crawl [default: 10]
+  -N NUM_THREADS, --num_threads=NUM_THREADS
+                        Number of threads to use [default: 1]
+  -C, --clean_start     Start clean by deleting old storage location [default:
+                        False]
+
+== REQUIRES
+
+* Python 2.6.1
+
+== AUTHORS
+
+Travis Hall
+trvs.hll@gmail.com
+
+Brittany Thompson
+miller317@gmail.com
+
+Bhadresh Patel
+bhadresh@wsu.edu
+
+== FILE MANIFEST
+
+* doc/Project1.pdf
+* doc/Project1.tex
+
+* lib/creepy/Crawler.py
+* lib/creepy/Fetcher.py
+* lib/creepy/PageStorage.py
+* lib/creepy/Parser.py
+* lib/creepy/Robot.py
+* lib/creepy/RobotStorage.py
+
+* creepy.py
+* README
+* seed.txt

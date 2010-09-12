@@ -26,17 +26,17 @@ __authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller <miller317@gmai
 __date__ = "Sep 5, 2010"
 __user_agent__ = "creepybot"
 
-_verbose = False
 _debug = False
 
 class Crawler:
     """
     A simple Web Crawler
     """
-    def __init__(self, seeds, num_threads=1, threshold=0):
+    def __init__(self, seeds, store_loc, num_threads=1, threshold=0, verbose=False):
+        self.verbose = verbose
         self.threshold = int(threshold) # Max. Number of Pages to Crawl
         self.robotstorage = RobotStorage(__user_agent__)
-        self.pagestorage = PageStorage({'store_location': sys.path[0] + "/../../storage/"})
+        self.pagestorage = PageStorage({'store_location': store_loc})
         self.urllist = [] # List of URLs crawled or in queue
         self.frontier = Queue() # Crawler's Request Queue
         for n in range(num_threads): # Pool of Threads
@@ -53,7 +53,7 @@ class Crawler:
         while True:
             try:
                 url = self.frontier.get()
-                if _verbose:
+                if self.verbose:
                     print "  Crawler #%d: %s" % (tid, url)
 
                 robot = self.robotstorage.get_robot(url)
@@ -61,7 +61,7 @@ class Crawler:
                     # Delay processing
                     d_time = robot.delay_remaining(time.time())
                     if d_time > 0:
-                        if _verbose > 1:
+                        if self.verbose > 1:
                             print "\n###*** Delaying for %f seconds" % d_time
                         time.sleep(d_time)
 
@@ -69,19 +69,19 @@ class Crawler:
                     robot.update_last_request(time.time())
 
                     # Download the Page
-                    page = Fetcher(url, verbose=_verbose)
+                    page = Fetcher(url, verbose=self.verbose)
                     doc = page.get_content()
                     if doc:
                         self.pagestorage.store(url, doc)
                         # Parse Page for Links
                         p = Parser(url, doc)
                         links = p.get_links()
-                        if _verbose > 1:
+                        if self.verbose > 1:
                             print "    # links on %s: %d" % (url, len(links))
                         for link in links:
                             self.queue_url(link)
                 else:
-                    if _verbose > 1:
+                    if self.verbose > 1:
                         print "*** URL not allowed:", url
             except:
                 pass
@@ -108,7 +108,7 @@ class Watcher:
             return
         else:
             self.watch()
-
+    
     def watch(self):
         try:
             os.wait()
@@ -116,46 +116,9 @@ class Watcher:
             print "Keyboard Interrupted, Quitting..."
             self.kill()
         sys.exit()
-
+    
     def kill(self):
         try:
             os.kill(self.child, signal.SIGKILL)
         except OSError: pass
-
-if __name__ == "__main__":
-    import optparse
-    parser = optparse.OptionParser(description="Web Crawler",
-                                   usage="usage: %prog [options] <seedfile | seeds>",
-                                   version=__version__)
-    parser.add_option('-v', '--verbose', help="Verbose Output [default: %default]", action="count", default=_verbose)
-    parser.add_option('-d', '--debug', help="Debug Mode [default: %default]", action="count", default=_debug)
-    parser.add_option('-T', '--page_threshold', help="Max. number of pages to crawl [default: %default]", metavar="THRESHOLD", default=10)
-    parser.add_option('-N', '--num_threads', help="Number of threads to use [default: %default]", metavar="NUM_THREADS", default=1)
-
-    (options, args) = parser.parse_args()
-    if not args:
-        parser.print_help()
-        sys.exit(1)
-
-    _verbose = options.verbose
-    _debug = options.debug
-    Watcher() # Watch for Keyboard Interrupt
-
-    seeds = []
-    for arg in args:
-        if os.path.isfile(arg):
-            fp = open(args[0], "r")
-            fcontent = fp.read()
-            fp.close()
-            seeds.extend(fcontent.splitlines())
-        else:
-            seeds.append(arg)
-
-    if len(seeds) == 0:
-        print "Please provide Seed URL or File that contains seed urls"
-        parser.print_help()
-        sys.exit(1)
-
-    print "### Number of seeds:", len(seeds)
-    c = Crawler(seeds, threshold=int(options.page_threshold), num_threads=int(options.num_threads))
-    print "### Number of URLs crawled:", len(c.urllist)
+    
