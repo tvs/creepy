@@ -21,7 +21,7 @@ from Parser import Parser
 from RobotStorage import RobotStorage
 from PageStorage import PageStorage
 
-__version__ = "0.1"
+__version__ = "1.0"
 __authors__ = "Travis Hall <trvs.hll@gmail.com>, Brittany Miller <miller317@gmail.com> and Bhadresh Patel <bhadresh@wsu.edu>"
 __date__ = "Sep 5, 2010"
 __user_agent__ = "creepybot"
@@ -55,7 +55,8 @@ class Crawler:
         """Crawl given URL"""
         while True:
             try:
-                if self.threshold > 0 and self._pagesstored > self.threshold: 
+                if self.threshold > 0 and self._pagesstored + 1 > self.threshold: 
+                	print "### Number of URLs crawled:", self._pagesstored
                 	self.watcher.kill()
                 	break
                 

@@ -58,5 +58,4 @@ if __name__ == "__main__":
     c = Crawler(seeds, _storage, 
         threshold=int(options.page_threshold), 
         num_threads=int(options.num_threads), 
-        verbose=_verbose)
-    print "### Number of URLs crawled:", len(c.urllist)
+        verbose=_verbose)    
