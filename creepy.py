@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys, os, shutil
 sys.path.append('lib/creepy/')
 

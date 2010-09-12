@@ -28,12 +28,14 @@ class PageStorage:
     
     def store(self, url, doc):
         locname = PageStorage.md5(url).hexdigest()
+        self.storage[url] = locname
+        
         f = open(self.opts['store_location'] + locname, 'w')
         f.write(doc)
         f.close()
         
         f = open(self.opts['store_location'] + self.opts['map_file'], 'a')
-        f.write(locname + " => " + url + "\n")
+        f.write(url + " => " + locname + "\n")
         f.close()
     
     

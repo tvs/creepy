@@ -35,19 +35,3 @@ Travis Hall, trvs.hll@gmail.com
 Brittany Thompson, miller317@gmail.com
 
 Bhadresh Patel, bhadresh@wsu.edu
-
-== FILE MANIFEST
-
-* doc/Project1.pdf
-* doc/Project1.tex
-
-* lib/creepy/Crawler.py
-* lib/creepy/Fetcher.py
-* lib/creepy/PageStorage.py
-* lib/creepy/Parser.py
-* lib/creepy/Robot.py
-* lib/creepy/RobotStorage.py
-
-* creepy.py
-* README
-* seed.txt
