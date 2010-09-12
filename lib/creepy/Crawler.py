@@ -36,7 +36,7 @@ class Crawler:
     def __init__(self, seeds, num_threads=1, threshold=0):
         self.threshold = int(threshold) # Max. Number of Pages to Crawl
         self.robotstorage = RobotStorage(__user_agent__)
-        self.pagestorage = PageStorage()
+        self.pagestorage = PageStorage({'store_location': sys.path[0] + "/../../storage/"})
         self.urllist = [] # List of URLs crawled or in queue
         self.frontier = Queue() # Crawler's Request Queue
         for n in range(num_threads): # Pool of Threads
