@@ -22,7 +22,7 @@ if __name__ == "__main__":
     parser.add_option('-v', '--verbose', help="Verbose Output [default: %default]", action="count", default=_verbose)
     parser.add_option('-d', '--debug', help="Debug Mode [default: %default]", action="count", default=_debug)
     parser.add_option('-O', '--output', action="store", type="string", dest="storage", help="Output location for stored files [default: %default]", default=_storage)
-    parser.add_option('-T', '--page_threshold', help="Max. number of pages to crawl [default: %default]", metavar="THRESHOLD", default=10)
+    parser.add_option('-T', '--page_threshold', help="Max. number of pages to crawl [default: %default]", metavar="THRESHOLD", default=2500)
     parser.add_option('-N', '--num_threads', help="Number of threads to use [default: %default]", metavar="NUM_THREADS", default=1)
     parser.add_option('-C', '--clean_start', help="Start clean by deleting old storage location [default: %default]", action="count", metavar="CLEAN_START", default=_clean)
 
