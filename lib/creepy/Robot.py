@@ -89,8 +89,9 @@ class Robot:
         
         if not found:
             startloc = string.find("User-agent: *")
-            string = string[startloc:]
-            string = string.split('\n', 1)[1]
+            if startloc > -1:
+            	string = string[startloc:]
+            	string = string.split('\n', 1)[1]
             
         # Reset these values with every parse (only parse after expiration time)
         self.allowed = []
