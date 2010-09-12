@@ -5,7 +5,7 @@ CS 453: Project 1 - Web Crawler
 
 import sys
 import time
-
+import signal
 from Queue import Queue
 import os
 from threading import Thread
