@@ -25,16 +25,16 @@ Options:
 
 * Python 2.6.1
 
+== LOCATION
+http://github.com/doggles/creepy
+
 == AUTHORS
 
-Travis Hall
-trvs.hll@gmail.com
+Travis Hall, trvs.hll@gmail.com
 
-Brittany Thompson
-miller317@gmail.com
+Brittany Thompson, miller317@gmail.com
 
-Bhadresh Patel
-bhadresh@wsu.edu
+Bhadresh Patel, bhadresh@wsu.edu
 
 == FILE MANIFEST
 
