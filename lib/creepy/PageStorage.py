@@ -6,13 +6,16 @@ Once a certain number of files are obtained or the crawler is done, the dictiona
 
 import os
 import re
+import hashlib
 
 class PageStorage:
     DEFAULT_OPTS = {
         # Maximum capacity for the hash - once over this point everything needs dumped
         'capacity': 1000,
         # Default storage location for all dumped files
-        'store_location': 'storage/'
+        'store_location': 'storage/',
+        # Default mapping file
+        'map_file': 'pid_map.dat'
     }
   
     def __init__(self, opts = {}):
@@ -24,19 +27,17 @@ class PageStorage:
             os.makedirs(d)
     
     def store(self, url, doc):
-        f = open(self.opts['store_location'] + PageStorage.slugify(url), 'w')
+        locname = PageStorage.md5(url).hexdigest()
+        f = open(self.opts['store_location'] + locname, 'w')
         f.write(doc)
         f.close()
+        
+        f = open(self.opts['store_location'] + self.opts['map_file'], 'a')
+        f.write(locname + " => " + url + "\n")
+        f.close()
+    
     
     @staticmethod
-    def slugify(value):
-        """
-        Normalizes string, converts to lowercase, removes non-alpha characters,
-        and converts spaces to hyphens. From the Django library: (template/defaultfilters.py)
-        """
-        # Note: Since the / are removed and not replaced, I guess there could be issues with uniqueness...
-        import unicodedata
-        value = unicodedata.normalize('NFKD', unicode(value)).encode('ascii', 'ignore')
-        value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
-        return re.sub('[-\s]+', '-', value)
+    def md5(value):
+        return hashlib.md5(value)
     
