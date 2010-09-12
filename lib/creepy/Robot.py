@@ -11,7 +11,8 @@ class Robot:
         # Default time-out for failed connections: 3 seconds
         'timeout': 3,
         # Default expiration time: 24 hrs (86,400 seconds)
-        'expires_in': 86400
+        'expires_in': 86400,
+        'delay': 0
     }
     
     def __init__(self, uri, user_agent, opts = {}):
@@ -21,7 +22,7 @@ class Robot:
         
         self.allowed = []
         self.disallowed = []
-        self.delay = 0
+        self.delay = self.opts['delay']
         self.other = {}
         
         self.last_request = 0

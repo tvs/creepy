@@ -8,7 +8,9 @@ class RobotStorage:
         # Default time-out for failed connections: 3 seconds
         'timeout': 3,   
         # Default expiration time: 24 hrs (86,400 seconds)
-        'expires_in': 86400
+        'expires_in': 86400,
+        # Default delay
+        'delay': 0
     }
     
     def __init__(self, user_agent, opts = {}):
