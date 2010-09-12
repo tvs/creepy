@@ -79,6 +79,13 @@ class Robot:
     
     def _parse(self, string):
         found = False
+        
+        # Reset these values with every parse (only parse after expiration time)
+        self.allowed = []
+        self.disallowed = []
+        self.delay = self.opts['delay']
+        self.other = {}
+        
         # Prune down our robots file to our specific user-agent (unless it doesn't exist)
         startloc = string.find("User-agent: " + self.user_agent)
         
@@ -92,12 +99,10 @@ class Robot:
             if startloc > -1:
             	string = string[startloc:]
             	string = string.split('\n', 1)[1]
-            
-        # Reset these values with every parse (only parse after expiration time)
-        self.allowed = []
-        self.disallowed = []
-        self.delay = 0
-        self.other = {}
+            else:
+                # If there are no rules that apply to us, let's just bail out now
+                return
+        
         
         for line in string.splitlines():
             if re.match(r'^\s*(#.*|$)', line): # Delete blank or comment lines
