@@ -53,6 +53,9 @@ The main goal of this project is to design and implement a \emph{web crawler}. T
 \section{Automation}
 
 \section{Document Storage}
+One part of this project is to be able to join the URL with its corresponding data. To do this, the documents retrieved by the crawler are put into a dictionary with the matching URL as the key. The documents are then renamed and written directly to the disk in a specified folder defaulted to ‘storage/’. File names are based on the URL, which by design, makes the file names unique. And, with using a default filter from the Django library, the file names are turned into normalized strings with all lower case letters and all the non-alpha numeric characters removed to make sure that it is a valid file name in the operating system. Once a preset number (default of a thousand) is reached or the crawler is finished, the dictionary is then dumped, keys and file names, into a file called ‘pid_map.dat’
+
+On the on hand, at the moment, a dictionary is a little superfluous. It is not being used to guarantee that items are unique, only a way to gather the documents into a file. However, it may be useful later on and it also acts as a secondary method to catch URL duplication.
 
 \section{Politeness}
 When implementing the politeness standards, one of the things we really wanted to do was create a nice, reusable and generic library for the politeness standards. To this end, the module is designed such that you simply create a \emph{Robot} object for a domain and then query whether or not you are allowed to access a URI. In order to ensure that \emph{robots.txt} does not go stale, the programmer can pass along an `expires\_in' value. When the \emph{Robot} is queried, it will then check whether the file is expired and automatically re-fetch and parse it when that is the case.
@@ -67,7 +70,7 @@ Sadly, the \emph{Robot} does not obey the extended standards for \emph{robots.tx
 
 \begin{description}
  \item[Travis Hall] Politeness standards, project management (Git/Github)
- \item[Brittany Miller] ... 
+ \item[Brittany Miller] Page Storage 
  \item[Bhadresh Patel] ...
 \end{description}
 
