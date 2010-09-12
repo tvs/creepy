@@ -25,6 +25,7 @@ storage/*
 *.bbl
 *.blg
 *.out
+*.bak
 
 # Random Mac thing
 *.DS_Store
