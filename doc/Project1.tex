@@ -45,7 +45,7 @@
 \end{titlepage}
 
 \begin{abstract}
-The main goal of this project is to design and implement a \emph{web crawler}. The name of our web crawler is \emph{Creepy}. \emph{Creepy} is simple web crawler written in python that takes set of seeds (URLs) and start crawling the Web.
+The main goal of this project is to design and implement a \emph{web crawler}. The name of our web crawler is \emph{Creepy}. \emph{Creepy} is simple web crawler written in Python that takes a set of seeds (URLs) and begins crawling the web.
 \end{abstract}
 
 \section{Overview}
@@ -55,13 +55,18 @@ The main goal of this project is to design and implement a \emph{web crawler}. T
 \section{Document Storage}
 
 \section{Politeness}
+When implementing the politeness standards, one of the things we really wanted to do was create a nice, reusable and generic library for the politeness standards. To this end, the module is designed such that you simply create a \emph{Robot} object for a domain and then query whether or not you are allowed to access a URI. In order to ensure that \emph{robots.txt} does not go stale, the programmer can pass along an `expires\_in' value. When the \emph{Robot} is queried, it will then check whether the file is expired and automatically re-fetch and parse it when that is the case.
+
+However, we also needed to design towards the state of the project as a whole, and one of the concerns was how to handle delays. In order to avoid duplicating a domain-based hash for each delay, reusing our \emph{RobotStorage} class (and thus our \emph{Robots}) seemed a natural choice. Unfortunately the result feels a little awkward, in that you have to update the \emph{Robot} and inform it when the last request was made. By preference, this is something that would occur naturally while fetching the page.
+
+Sadly, the \emph{Robot} does not obey the extended standards for \emph{robots.txt}. Though it certainly will parse out that information, it will be stored in the `other' field and is unused unless specifically programmed for. This means that information like `Visit-time', `Request-rate', and `Comment' are largely left ignored. This is not to say that it cannot be extended to obey them, but we had not discovered the extended standard until after the parser was already written and in use.
 
 \section{Duplicate Detection}
 
 \section{Roles}
 
 \begin{description}
- \item[Travis Hall] ...
+ \item[Travis Hall] Politeness standards, project management (Git/Github)
  \item[Brittany Miller] ... 
  \item[Bhadresh Patel] ...
 \end{description}

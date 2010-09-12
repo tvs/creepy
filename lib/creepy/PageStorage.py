@@ -1,4 +1,3 @@
-
 """
 PageStorage.py
 Each retrieved document is renamed and saved as a unique ID based on the URL since URLs are by design unique
@@ -35,6 +34,7 @@ class PageStorage:
         Normalizes string, converts to lowercase, removes non-alpha characters,
         and converts spaces to hyphens. From the Django library: (template/defaultfilters.py)
         """
+        # Note: Since the / are removed and not replaced, I guess there could be issues with uniqueness...
         import unicodedata
         value = unicodedata.normalize('NFKD', unicode(value)).encode('ascii', 'ignore')
         value = unicode(re.sub('[^\w\s-]', '', value).strip().lower())
