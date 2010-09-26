@@ -1,7 +1,7 @@
 = Creepy
 
 == DESCRIPTION
-Creepy is a web crawler written in Python that reads in a list of seeds and branches out from there, scavenging the web until it has collecting some specified number of webpages.
+Creepy is a web crawler written in Python that reads in a list of seeds and branches out from there, scavenging the web until it has collected some specified number of webpages.
 
 == RUNNING
 <tt>$ creepy.py [options] <seed></tt>
