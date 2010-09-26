@@ -4,7 +4,7 @@ require "lib/rucksack"
 
 class TestRucksackDocStore < Test::Unit::TestCase
   def setup
-    @docstore = Rucksack::DocStore.new()
+    @docstore = Rucksack::DocStore.new("test/rucksack/small_storage/pid_map.dat")
     @options = {:indent => 2}
   end
   
@@ -18,7 +18,7 @@ class TestRucksackDocStore < Test::Unit::TestCase
   end
   
   def test_small_import
-    @docstore.import_map("test/rucksack/small_storage/pid_map.dat")
+    # @docstore.import_map("test/rucksack/small_storage/pid_map.dat")
     assert_equal(3, @docstore.docs.length)
     puts @docstore.to_xml(@options)
   end
