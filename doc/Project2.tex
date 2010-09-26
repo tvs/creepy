@@ -1,0 +1,78 @@
+\documentclass[letterpaper,11pt,twoside]{article}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{fancyhdr, lastpage}
+\usepackage[pdftex]{graphicx}
+\pdfinfo{
+   /Author (Travis Hall, Brittany Thompson and Bhadresh Patel) 
+   /Title (Creepy - Project Report)
+}
+
+\setlength{\parskip}{0.5ex}
+\pagestyle{fancy}
+\setlength{\headheight}{14.0pt}
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[RO,RE] {Project Report: \emph{Creepy - Data Cleanser}}
+\fancyfoot[LO,LE] {CS 453: Project 2 - Data Preparation}
+\fancyfoot[RO,RE] {Page \thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\begin{document}
+
+%%%%%%%%%% Title Page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+   \begin{center}
+       {\Large \textbf{CS 453: Project 2 - Data Preparation}}\\[0.5cm]
+       {\Large \textbf{Project Report}}\\[3.0cm]
+
+       {\rule{\linewidth}{0.5mm}} \\[0.5cm]
+       {\Huge \textbf{Creepy - Data Cleanser}}\\[0.4cm] 
+       {\rule{\linewidth}{0.5mm}} \\[2.0cm]
+
+       \textbf{Travis Hall}\\
+       \texttt{trvs.hll@gmail.com}\\[0.5cm]
+       \textbf{Brittany Thompson}\\
+       \texttt{miller317@gmail.com}\\[0.5cm]
+       \textbf{Bhadresh Patel}\\
+       \texttt{bhadresh@wsu.edu}\\[0.5cm]
+
+       \vfill
+       Washington State University Vancouver\\
+       October 03, 2010
+   \end{center}
+\end{titlepage}
+
+\begin{abstract}
+The main goal of this project is to design and implement data preparation or data cleansing step of the search engine. We already collected small collection of pages via the web crawler. We will be removing all unnecessary portions in the document collection through a
+combined process of (i) tag-stripping, (ii) tokenizing, (iii) stopping, and (iv) stemming. Additionally, we
+will be preparing a document graph for link analysis. 
+\end{abstract}
+
+\section{Overview}
+
+\section{XML Document Graph}
+
+\section{XML Validator}
+
+\section{Tag-stripping}
+
+\section{Tokenizing}
+
+\section{Stopping}
+
+\section{Stemming}
+
+
+\section{Roles}
+\begin{description}
+ \item[Travis Hall] Link analysis graph and XML validator.
+ \item[Brittany Miller] Stopping and stemming.
+ \item[Bhadresh Patel] Tag-stripping and tokenizing.
+\end{description}
+
+\section{Test Environment}
+For testing/production purpose, we set up a machine instance on Amazon EC2. The instance id of the machine is \texttt{i-4fb4ec25}. The source code is checked out at \texttt{/home/ubuntu/creepy/}.
+
+\end{document}

@@ -10,6 +10,7 @@ from Queue import Queue
 import os
 import threading
 import urlparse
+import re
 try: # Try using psyco JIT compilation!
     import psyco
     psyco.full()
@@ -55,11 +56,11 @@ class Crawler:
         """Crawl given URL"""
         while True:
             try:
-                if self.threshold > 0 and self._pagesstored + 1 > self.threshold: 
-                	print "### Number of URLs crawled:", self._pagesstored
-                	self.watcher.kill()
-                	break
-                
+                if self.threshold > 0 and self._pagesstored + 1 > self.threshold:
+                    print "### Number of URLs crawled:", self._pagesstored
+                    self.watcher.kill()
+                    break
+
                 url = self.frontier.get()
                 if self.verbose:
                     print "  Crawler #%d: %s" % (tid, url)
@@ -83,9 +84,9 @@ class Crawler:
                         self.pagestorage.store(url, doc)
                         self._lock.acquire()
                         try:
-							self._pagesstored = self._pagesstored + 1
+                            self._pagesstored = self._pagesstored + 1
                         finally:
-                        	self._lock.release()
+                            self._lock.release()
 
                         # Parse Page for Links
                         p = Parser(url, doc)
@@ -107,9 +108,11 @@ class Crawler:
             self.frontier.put(url)
 
     def validate_url(self, url):
-        """Validate given url"""
+        """Validate given url - skip image/video/zip..."""
         u = urlparse.urlparse(url)
-        return u.scheme in ['http', 'https'] and u.netloc and not u.fragment
+        if u.scheme in ['http', 'https'] and u.netloc and not u.fragment:
+            return not re.search(r'(jpg|jpeg|gif|png|exe|msi|dmg|gz|zip|tar|mov|mpg|mp3|mp4)$', u.path, re.I)
+        return False
 
 class Watcher:
     """Watch for Signal and quit the program"""
@@ -119,7 +122,7 @@ class Watcher:
             return
         else:
             self.watch()
-    
+
     def watch(self):
         try:
             os.wait()
@@ -127,9 +130,8 @@ class Watcher:
             print "Keyboard Interrupted, Quitting..."
             self.kill()
         sys.exit()
-    
+
     def kill(self):
         try:
             os.kill(self.child, signal.SIGKILL)
         except OSError: pass
-    

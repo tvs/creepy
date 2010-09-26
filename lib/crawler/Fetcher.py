@@ -31,10 +31,10 @@ class Fetcher:
         for key, value in _headers.iteritems():
             request.add_header(key, value)
 
-    def get_content(self):
+    def get_content(self, mime='text'):
         content = None
         try:
-            if self.response:
+            if self.response and (not mime or self.response.headers.type.startswith(mime)):
                 content = self.response.read()
         except:
             pass
