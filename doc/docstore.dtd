@@ -1,0 +1,11 @@
+<!ELEMENT   docstore (doc)*>
+<!ELEMENT   doc (from, to)>
+<!ELEMENT   from (page)*>
+<!ELEMENT   to (page)*>
+<!ELEMENT   page EMPTY>
+<!ATTLIST   doc
+            id CDATA #REQUIRED
+            url CDATA #REQUIRED>
+<!ATTLLIST  page
+            id CDATA #REQUIRED
+            url CDATA #REQUIRED>
