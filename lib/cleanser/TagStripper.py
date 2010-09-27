@@ -2,31 +2,21 @@
 import sys
 import os
 import re
-from HTMLParser import HTMLParser
+import string
 
 __version__ = "1.0"
 __authors__ = "Bhadresh Patel <bhadresh@wsu.edu>"
 __date__ = "Sep 23, 2010"
 
-class Stripper(HTMLParser):
-    def __init__(self):
-        self.reset()
-        self.fed = []
-    def handle_data(self, d):
-        self.fed.append(d)
-    def get_data(self):
-        return ''.join(self.fed)
-
 class TagStripper:
     """HTML Tag Stripper"""
     def __init__(self, indir=None, outdir=None, verbose=False):
         self.verbose = verbose
-        self.startRM = re.compile(r'<(!\s*--|style\b|script\b)', re.I)
-        self.endRM = {
-            '!': re.compile(r'--\s*>'), # HTML Comment
-            'script': re.compile(r'</script[^>]*>', re.I), # Script Tags
-            'style': re.compile(r'</style[^>]*>', re.I) # Style Tags
-        }
+        self.patterns = [
+            re.compile(r'<(style|script|object|embed|applet|noframes|noscript)[^>]*?>.*?</\1>', re.I | re.S), # Aggressively strip tags
+            re.compile(r'<![\s\S]*?--[ \t\n\r]*>'), # Strip HTML comments
+            re.compile(r'<[\/\!]*?[^<>]*?>', re.I | re.S), # Strip HTML tags
+        ]
         
         if indir:
             for f in os.listdir(indir):
@@ -35,41 +25,27 @@ class TagStripper:
                 fp = open(os.path.join(indir, f), "r")
                 content = fp.read()
                 fp.close()                
-                content  = self.strip_tags(content)
+                content = self.strip_tags(content)
+                content = self.clean(content)
                 if outdir and content:
                     fp = open(os.path.join(outdir, f), "w")
                     fp.write(content)
                     fp.close()
         
+    def clean(self, html):
+        """Remove Multiple lines and spaces"""
+        return string.join(string.split(html))
+
     def strip_tags(self, html):
-        html = self.aggressively_strip(html)
-        try:
-            s = Stripper()
-            s.feed(html)
-            html = s.get_data()
-            html = re.sub('\s+', ' ', re.sub('\n+|\t+', ' ', html))
-            return html.strip()
+        """Strip Tags"""
+        try:           
+            for p in self.patterns:
+                html = p.sub('', html)            
         except:
             if self.verbose:
-                print "  Skipped: Error parsing the page"
-            return None
-
-    def aggressively_strip(self, html):
-        chunks, pos = [], 0
-        while True:
-            startmatch = self.startRM.search(html, pos)
-            if not startmatch:
-                break
-            tagname = startmatch.group(1).rstrip('-').strip()
-            tagname = tagname.lower().encode('utf-8')
-            endmatch = self.endRM[tagname].search(html, startmatch.end())
-            if not endmatch:
-                break
-            chunks.append(html[pos:startmatch.start()])
-            pos = endmatch.end()
-        chunks.append(html[pos:])
-        html = ''.join(chunks)
-        return html
+                print "  Error stripping tags"
+            pass
+        return html        
 
 if __name__ == "__main__":
     _storage = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../storage'))
@@ -90,7 +66,7 @@ if __name__ == "__main__":
                 fp.close()
                 
                 t = TagStripper()
-                print t.strip_tags(fcontent)
+                print t.clean(t.strip_tags(fcontent))
     else:
         TagStripper(
             indir=options.input,
