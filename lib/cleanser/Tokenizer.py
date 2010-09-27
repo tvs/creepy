@@ -2,6 +2,7 @@
 import sys
 import os
 import re
+import string
 
 __version__ = "1.0"
 __authors__ = "Bhadresh Patel <bhadresh@wsu.edu>"
@@ -25,7 +26,9 @@ class Tokenizer:
                     fp.close()
         
     def tokenize(self, html):
-        return None
+        out = html.lower()
+        out = out.translate(None, string.punctuation)
+        return out.strip()
 
 if __name__ == "__main__":
     _storage = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../storage'))
