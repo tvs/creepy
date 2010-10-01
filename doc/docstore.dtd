@@ -6,6 +6,6 @@
 <!ATTLIST   doc
             id CDATA #REQUIRED
             url CDATA #REQUIRED>
-<!ATTLLIST  page
+<!ATTLIST   page
             id CDATA #REQUIRED
             url CDATA #REQUIRED>

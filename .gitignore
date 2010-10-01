@@ -1,3 +1,6 @@
+# Mapping files for poking around
+*map.xml
+
 # Temporary and build folders
 tmp/*
 bin/*

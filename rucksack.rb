@@ -41,4 +41,4 @@ xml_opts = {:indent => OPTIONS[:indent]}
 
 OPTIONS[:output].print docs.to_xml(xml_opts)
 
-File.close(OPTIONS[:output]) if OPTIONS[:output_to_file]
+OPTIONS[:output].close if OPTIONS[:output_to_file]
