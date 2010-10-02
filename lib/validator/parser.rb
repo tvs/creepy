@@ -9,6 +9,7 @@ module Parser
 
   class Parser
     XML_DEFAULT_VERSION = "1.0"
+    XML_ELEMENT_TYPE = [:empty, :any]
     # XML Parser based heavily from libxml2
     # TODO: readers
     attr_accessor :index, :eof_index, :content, :line
@@ -516,28 +517,53 @@ module Parser
       end
     end
     
-  end
-  
-  class DTDParser < Parser
-    
-    def xmlParseMarkupDecl()
-      @index = 0
-    end
-  
+    # xmlParseElementDecl
+    # parse an element declaration
+    #
+    # [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
+    #
+    # No element type may be declared more than once
+    #
+    # Returns the type of the element, or nil in case of error
     def xmlParseElementDecl()
+      ret = nil
+      if (cmp('<!ELEMENT'))
+        skip(9)
+        raise XML_Syntax_Error, "line #{@line}: space required after 'ELEMENT'" if is_blank?
+        skip_blanks
+        
+        name = xmlParseName()
+        if name.nil?
+          raise XML_Syntax_Error, "line #{@line}: no name declared for element"
+          return nil
+        end
+        raise XML_Syntax_Error, "line #{@line}: space required after element name" if is_blank?
+        skip_blanks
+        
+        if (cmp("EMPTY"))
+          skip(5)
+          ret = :empty
+        elsif (cmp("ANY"))
+          skip(3)
+          ret = :any
+        elsif (cur == '(')
+          ret = xmlParseElementContentDecl()
+        else
+          raise XML_Syntax_Error, "line #{@line}: 'EMPTY', 'ANY', or '(' expected"
+          return nil
+        end
+        
+        skip_blanks
+        if (cur != '>')
+          raise XML_Syntax_Error, "line #{@line}: element declaration left open"
+        else
+          skip
+          # TODO: Construct tree
+        end
+      end
+      ret
     end
-  
-    def xmlParseAttributeDecl()
-    end
-  
-    def xmlParseEntityDecl()
-    end
-  
-    def xmlParseNotationDecl()
-    end
-  end
-  
-  class XMLParser < Parser
+    
   end
   
 end
