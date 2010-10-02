@@ -4,6 +4,8 @@ module Parser
   class XML_PI_Error < Exception; end
   class XML_Reserved_Name < Exception; end
   class XML_Syntax_Error < Exception; end
+  class XML_Document_Empty < Exception; end
+  class XML_Unknown_Version < Exception; end
 
   class Parser
     XML_DEFAULT_VERSION = "1.0"
@@ -72,7 +74,12 @@ module Parser
     # is_blank?
     # returns true if cur is a blank char
     def is_blank?
-      c = cur[0]
+      is_blank_char?(cur)
+    end
+    
+    # is_blank_char?
+    # returns true if char is a blank
+    def is_blank_ch?(c)
       return c == 0x20 || c == 0x9 || c == 0xD || c == 0xA
     end
     
@@ -221,6 +228,37 @@ module Parser
       end
     end
     
+    # xmlParseXMLDecl
+    # parse an XML declaration header for external entities
+    #
+    # [23] XMLDecl ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
+    #
+    def xmlParseXMLDecl()
+      if (cmp("<?xml"))
+        skip(5)
+        raise XML_Syntax_Error, "line #{@line}: whitespace expected after '<?xml'" if !is_blank?
+        
+        skip_blanks
+        version = xmlParseVersionInfo()
+        raise XML_Syntax_Error, "line #{@line}: missing version in xml declaration"
+        raise XML_Unknown_Version, "unsupported version: '#{version}'" if version != XML_DEFAULT_VERSION
+        
+        encoding = xmlParseEncodingDecl()
+        
+        skip_blanks
+        if (cmp('?>'))
+          skip(2)
+        elsif (cmp('>'))
+          raise XML_Syntax_Error, "xml declaration not finished"
+          skip
+        else
+          raise XML_Syntax_Error, "xml declaration not finished"
+          move_to_end_tag
+          skip
+        end
+      end
+    end
+    
     # xmlParseVersionInfo
     # parse the XML version
     #
@@ -354,6 +392,128 @@ module Parser
     	  c = cur
     	end
     	return encoding
+    end
+    
+    # xmlParseDocument
+    # parse an xml document (and build a tree)
+    #
+    # [1] document ::= prolog element Misc*
+    #
+    # [22] prolog ::= XMLDecl? Misc* (doctypedecl Misc*)?
+    #
+    # Returns True if passes validation, throws error otherwise
+    def xmlParseDocument()
+      raise XML_Document_Empty, "File content is empty" if @eof_index == 0
+      
+      if (cmp('<?xml') && is_blank_ch?(nxt(5)))
+        xmlParseXMLDecl()
+        skip_blanks
+      end
+      
+      xmlParseMisc()
+      
+      if (cmp('<!DOCTYPE'))
+        xmlParseDocTypeDecl()
+        xmlParseInternalSubset() if cur == '['
+      end
+      
+    end
+    
+    # xmlParseMisc
+    # parse an XML Misc* optional field
+    #
+    # [27] Misc ::= Comment | PI | S
+    #
+    def xmlParseMisc()
+      while ((cur == '<') && (nxt(1) == '?') || cmp('<!--') || is_blank?)
+        if ((cur == '<') && (nxt(1) == '?'))
+          xmlParsePI()
+        elsif is_blank?
+          skip
+        else
+          xmlParseComment()
+        end
+      end
+    end
+    
+    # xmlParseDocTypeDecl
+    # parse a DOCTYPE declaration
+    #
+    # [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S? 
+    #                      ('[' (markupdecl | PEReference | S)* ']' S?)? '>'
+    #
+    def xmlParseDocTypeDecl()
+      if (cmp('<!DOCTYPE'))
+        skip(9)
+        skip_blanks
+      
+        name = xmlParseName()
+        raise XML_Syntax_Error, "DOCTYPE name required!" if name.nil?
+        
+        skip_blanks
+        uri = xmlParseExternalID()
+        
+        skip_blanks
+        return if cur == '[' # If there are any internal subset decls it's handled external
+        
+        raise XML_Syntax_Error, "DOCTYPE not finished!" if (cur != '>')
+        skip
+      end
+    end
+    
+    # xmlParseInternalSubset
+    # parse the internal subset declaration
+    #
+    # [28 end] ('[' (markupdecl | PEReference | S)* ']' S?)? '>'
+    #
+    # TODO: xmlParsePEReference
+    def xmlParseInternalSubset
+      if (cur == '[')
+        skip
+        
+        while (cur != ']')
+          skip_blanks
+          xmlParseMarkupDecl()
+          xmlParsePEReference()
+        end
+        if (cur == ']')
+          skip
+          skip_blanks
+        end
+      end
+      
+      raise XML_Syntax_Error, "DOCTYPE not finished!" if (cur != '>')
+      skip
+    end
+    
+    # xmlParseMarkupDecl
+    # parse markup declarations
+    #
+    # [29] markupdecl ::= elementdecl | AttlistDecl | EntityDecl |
+    #                     NotationDecl | PI | Comment
+    #
+    # TODO: xmlParseElementDecl, xmlParseEntityDecl, xmlParseAttributeListDecl, xmlParseNotationDecl
+    def xmlParseMarkupDecl
+      if (cur == '<')
+        if (nxt(1) == '!')
+          case nxt(2)
+            when 'E'
+              if nxt(3) == 'L'
+                xmlParseElementDecl()
+              elsif nxt(3) == 'N'
+                xmlParseEntityDecl()
+              end
+            when 'A'
+              xmlParseAttributeListDecl()
+            when 'N'
+              xmlParseNotationDecl()
+            when '-'
+              xmlParseComment()
+          end
+        elsif (nxt(1) == '?')
+          xmlParsePI()
+        end
+      end
     end
     
   end
