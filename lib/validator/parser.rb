@@ -9,7 +9,7 @@ module Parser
 
   class Parser
     XML_DEFAULT_VERSION = "1.0"
-    XML_ELEMENT_TYPE = [:empty, :any]
+    XML_ELEMENT_TYPE = [:empty, :any, :mixed, :children]
     # XML Parser based heavily from libxml2
     # TODO: readers
     attr_accessor :index, :eof_index, :content, :line
@@ -527,6 +527,7 @@ module Parser
     # Returns the type of the element, or nil in case of error
     def xmlParseElementDecl()
       ret = nil
+      content = nil
       if (cmp('<!ELEMENT'))
         skip(9)
         raise XML_Syntax_Error, "line #{@line}: space required after 'ELEMENT'" if is_blank?
@@ -547,7 +548,7 @@ module Parser
           skip(3)
           ret = :any
         elsif (cur == '(')
-          ret = xmlParseElementContentDecl()
+          ret, content = xmlParseElementContentDecl(name)
         else
           raise XML_Syntax_Error, "line #{@line}: 'EMPTY', 'ANY', or '(' expected"
           return nil
@@ -562,6 +563,67 @@ module Parser
         end
       end
       ret
+    end
+    
+    # xmlParseElementContentDecl
+    # parse the declaration for an element content either Mixed or Children,
+    # the cases for EMPTY and ANY are handled in xmlParseElementDecl
+    #
+    # [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
+    #
+    # returns [type, tree] or nil in case of error
+    def xmlParseElementContentDecl(name)
+      res = nil
+      tree = nil
+      if (cur != '(')
+        raise XML_Syntax_Error, "#{name}: '(' expected"
+        return nil
+      end
+      
+      skip
+      skip_blanks
+      
+      if (cmp('#PCDATA'))
+        tree = xmlParseElementMixedContentDecl()
+        res = :mixed
+      else
+        tree = xmlParseChildrenContentDeclPriv()
+        res = :children
+      end
+      skip_blanks
+      
+      return nil if res.nil && tree.nil?
+      return [res, tree]
+    end
+    
+    # xmlParseElementMixedContentDecl
+    # parse the declaration for a Mixed Element content
+    #
+    # The leading '(' and spaces have been skipped in xmlParseElementContentDecl
+    # 
+    # [51] Mixed ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*' |
+    #                '(' S? '#PCDATA' S? ')'
+    #
+    # [ VC: Proper Group/PE Nesting ] applies to [51] too (see [49])
+    #
+    # [ VC: No Duplicate Types ]
+    # The same name must not appear more than once in a single
+    # mixed-content declaration. 
+    #
+    # returns: the list of the xmlElementContentPtr describing the element choices
+    def xmlParseElementMixedContentDecl()
+      ret = nil
+      if (cmp('#PCDATA'))
+        skip(7)
+        skip_blanks
+        
+        if (cur == ')')
+          skip
+          ret = xmlNewDocElementContent()
+          return nil if ret.nil?
+        end
+        
+      end
     end
     
   end
