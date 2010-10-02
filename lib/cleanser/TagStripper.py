@@ -15,7 +15,7 @@ class TagStripper:
         self.patterns = [
             re.compile(r'<(style|script|object|embed|applet|noframes|noscript)[^>]*?>.*?</\1>', re.I | re.S), # Aggressively strip tags
             re.compile(r'<![\s\S]*?--[ \t\n\r]*>'), # Strip HTML comments
-            re.compile(r'<[\/\!]*?[^<>]*?>', re.I | re.S), # Strip HTML tags
+            re.compile(r'<[\/\!]*?[^<>]*?>', re.S), # Strip HTML tags
         ]
         
         if indir:
@@ -40,7 +40,7 @@ class TagStripper:
         """Strip Tags"""
         try:           
             for p in self.patterns:
-                html = p.sub('', html)            
+                html = p.sub(' ', html)            
         except:
             if self.verbose:
                 print "  Error stripping tags"
