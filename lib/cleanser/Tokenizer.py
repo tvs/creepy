@@ -18,7 +18,7 @@ class Tokenizer:
                 content = fp.read()
                 fp.close()
                 content  = self.tokenize(content)
-                if outdir and content:
+                if outdir:
                     fp = open(os.path.join(outdir, f), "w")
                     fp.write(content)
                     fp.close()
