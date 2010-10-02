@@ -45,20 +45,124 @@
 \end{titlepage}
 
 \begin{abstract}
-The main goal of this project is to design and implement data preparation or data cleansing step of the search engine. We already collected small collection of pages via the web crawler. We will be removing all unnecessary portions in the document collection through a
-combined process of (i) tag-stripping, (ii) tokenizing, (iii) stopping, and (iv) stemming. Additionally, we
-will be preparing a document graph for link analysis. 
+The main goal of this project is to design and implement data preparation or data cleansing stage of the search engine. We already collected small collection of pages via the web crawler in our first project. We will be removing all unnecessary portions in the document collection through a combined process of (i) tag-stripping, (ii) tokenizing, (iii) stopping, and (iv) stemming. Additionally, we will be preparing a document graph for link analysis. 
 \end{abstract}
 
 \section{Overview}
+In this project, \emph{Creepy} is designed to prepare the document collection that was crawled by the crawler for the further stages of the search engine \emph{i.e.} cleanse documents. The documents crawled by the crawler are typically not in a plain text. Instead, most of them are in HTML format and can also be in other well know formats like Word, Powerpoint, PDF etc. These documents needs to be convert into text plus some metadata for the further stage of the search engine. In project 1, we tweaked our crawler to crawl documents that are in plain text or HTML format only. Conversion of other formats to plain text is rather complicated and is beyond the scope of this project.    
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[trim=0.0in 2.00in 0.0in 0.0in, clip, page=1]{figures.pdf}
+	\caption{Data Cleansing}
+	\label{fig:data_cleansing}
+\end{figure}
+
+The task of data cleansing process is to take the collection of documents already crawled by the crawler and convert them into sequence of text \emph{tokens} for the indexer component of the search engine. The cleansing process will generate the cleansed document through a combined process of (i) tag-stripping, (ii) tokenizing, (iii) stopping, and (iv) stemming as illustrated in the figure~\ref{fig:data_cleansing}.
 
 \section{XML Document Graph}
 
 \section{XML Validator}
 
 \section{Tag-stripping}
+The first task in data cleansing process is to recognize the structural elements of the document and remove them. This process is referred to as \emph{tag-stripping}. Document structure is often specified by a markup language, for example HTML is used for specifying the structure of web pages. The tag-stripping component uses knowledge of the syntax of the HTML language to identify the structure of the document. In HTML, \emph{tags} are used to define document elements. These tags does not add any value for the search engine and they are removed at this stage. There is two types of tag stripping (i) aggressively; and (ii) \emph{individually}; that can be applied to the document collection. Tag-stripping is performed on the document collection that is crawled by the crawler.
+
+\subsection{Aggressive tag-stripping} 
+Aggressive tag-stripping removes the whole HTML element \emph{i.e.} removes tags and its content. There are certain tags in HTML page that is used only for structural purpose or for dynamic scripting only. These HTML elements can be removed fully since it does not contribute any relevant information for the search. For example, \verb|<script type="text/javascript">functionCall();</script>| would be fully removed by the tag-stripping component. We selected following HTML tags that are aggressively removed from the document: script, style, object, embed, applet, noframes, and noscript. 
+
+\subsection{Individual tag-stripping}
+Individual tag-stripping only removes the tags and its attributes from the HTML element and leaves any content intact that occurs between the opening and closing tag. For example, \\\verb|<h1 style="font-size:14px;">My page title</h1>| will become \verb|My page title| after removing individual tags. After the aggressive tag-stripping is applied to the document, individual tag-stripping is applied to remove any tags appear in the document. After this stage, the resulting document will only contain plain text that does not have any structural elements of the document. 
+
+\subsection{Implementation}
+\begin{table}[htb]
+\centering
+\begin{tabular}{|p{\textwidth}|}
+\hline
+\begin{verbatim}
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <title>WSU Vancouver - Engineering and Computer Science</title>
+    <link rel="shortcuticon" href="/sites/all/themes/departments/favicon.ico" 
+         type="image/x−icon" />
+    <script type="text/JavaScript" language="JavaScript">
+        var id=3; functionCall(id);
+    </script>
+    <style type="text/css">
+        .field-content {margin:4px;}
+    </style>
+  </head>
+<body>
+  <div class="field−content">
+    <p>The School of Engineering and Computer Science (ENCS) is anacademic unit
+    of the WSU College of Engineering and Architecture that houses the
+    engineering and computer science programs located at
+    <a href="http://www.vancouver.wsu.edu">WSU Vancouver</a>.
+    The School offers ABET accredited Bachelor of Science degrees in computer
+    science and mechanical engineering.</p>
+  </div>
+</body>
+</html>
+\end{verbatim}\\
+\hline
+\end{tabular}
+\caption{Sample HTML document}
+\label{tab:samplepage}
+\end{table}
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|p{\textwidth}|}
+\hline
+\begin{verbatim}
+ 
+   
+     WSU Vancouver - Engineering and Computer Science 
+     
+     
+     
+   
+ 
+   
+     The School of Engineering and Computer Science (ENCS) is anacademic unit
+    of the WSU College of Engineering and Architecture that houses the
+    engineering and computer science programs located at
+     WSU Vancouver .
+    The School offers ABET accredited Bachelor of Science degrees in computer
+    science and mechanical engineering. 
+   
+ 
+ 
+
+
+\end{verbatim}\\
+\hline
+\end{tabular}
+\caption{Sample HTML document after tag-stripping}
+\label{tab:samplepage_stripped}
+\end{table}
+
+The implementation of tag-stripping is done in Python. There are some Python modules available that allows stripping tags from the HTML document, for example, HTMLParser, htmllib, Beautiful Soup and sgmllib. In our initial experiments, we notice that most of these modules removes tags quite effectively when the HTML page is well-formed---syntactically valid HTML document. But they failed to remove some tags if the document is not well-formed. Since, web pages are inherently error prone document that does not necessarily follow the standards. So we were not able to use existing modules of Python for our tag-stripping component. We wrote our own module that uses regular expression to remove any tags. The regular expressions are written such that it does not care about well-formed HTML elements and still remove all the tags. The table~\ref{tab:samplepage} shows sample HTML document and after removing tags using the tag-stripping component the generated document is shown in table~\ref{tab:samplepage_stripped}.
 
 \section{Tokenizing}
+\emph{Tokenizing} is the process of forming term or token from the sequence of characters in a document. Thus, tokenizing converts most of the document content to search-able tokens. Tokenizer takes the document that was generated by the tag-stripping component as input and generates a new document that contains only tokens. At this stage, we assume that the tag-stripping component removed any text that was structural part of the document and leaves text that is actual content of the document. The design of our tokenizer consist of three step process as described below.
+\begin{description}
+	\item [Case folding] This is the simplest step in which all uppercase letters are converted to lowercase. 
+	\item [Remove punctuations] In this step we remove all the punctuation characters from the document. We considered \verb !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~  as the punctuation characters that are removed from the document.
+	\item [Generate tokens] The last step is to generate tokens, in this step multiple spaces, new line, tab etc.. are removed. The resulting document will contain all the terms separated by single space.
+\end{description}
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|p{\textwidth}|}
+\hline
+wsu vancouver engineering and computer science the school of engineering and computer science encs is anacademic unit of the wsu college of engineering and architecture that houses the engineering and computer science programs located at wsu vancouver the school offers abet accredited bachelor of science degrees in computer science and mechanical engineering\\
+\hline
+\end{tabular}
+\caption{Tokens generated by tokenizer for the sample HTML document}
+\label{tab:samplepage_tokenized}
+\end{table}
+
+At the end of the three step process of tokenizer we save the generated tokens into new document that is used for further steps in data cleansing process. For example, the table~\ref{tab:samplepage_tokenized} shows the tokens generated (each token is separated by sapce) by the tokenizer for the sample document produced by tag-stripping component as shown in the table~\ref{tab:samplepage_stripped}. We note that, the design of the tokenizer is kept simple and flexible, the same rules would be applied to the search query in the query transformation component. Hence, all the punctuations and tokens would be treated in same manner to the query and it should result in appropriate match to the index terms. 
 
 \section{Stopping}
 
@@ -73,6 +177,6 @@ will be preparing a document graph for link analysis.
 \end{description}
 
 \section{Test Environment}
-For testing/production purpose, we set up a machine instance on Amazon EC2. The instance id of the machine is \texttt{i-4fb4ec25}. The source code is checked out at \texttt{/home/ubuntu/creepy/}.
+For testing/production purpose, we set up a machine instance on Amazon EC2. The instance id of the machine is \texttt{i-7d1e0d17}. The source code is checked out at \texttt{/home/ubuntu/creepy/}.
 
 \end{document}
