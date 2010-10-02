@@ -1,8 +1,6 @@
 """HTML Tag Stripper"""
-import sys
 import os
 import re
-import string
 
 __version__ = "1.0"
 __authors__ = "Bhadresh Patel <bhadresh@wsu.edu>"
@@ -17,35 +15,30 @@ class TagStripper:
             re.compile(r'<![\s\S]*?--[ \t\n\r]*>'), # Strip HTML comments
             re.compile(r'<[\/\!]*?[^<>]*?>', re.S), # Strip HTML tags
         ]
-        
+
         if indir:
             for f in os.listdir(indir):
                 if self.verbose:
                     print "Processing: %s" % (f)
                 fp = open(os.path.join(indir, f), "r")
                 content = fp.read()
-                fp.close()                
+                fp.close()
                 content = self.strip_tags(content)
-                content = self.clean(content)
                 if outdir and content:
                     fp = open(os.path.join(outdir, f), "w")
                     fp.write(content)
                     fp.close()
-        
-    def clean(self, html):
-        """Remove Multiple lines and spaces"""
-        return string.join(string.split(html))
 
     def strip_tags(self, html):
         """Strip Tags"""
-        try:           
+        try:
             for p in self.patterns:
-                html = p.sub(' ', html)            
+                html = p.sub(' ', html)
         except:
             if self.verbose:
                 print "  Error stripping tags"
             pass
-        return html        
+        return html
 
 if __name__ == "__main__":
     _storage = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../storage'))
@@ -64,9 +57,9 @@ if __name__ == "__main__":
                 fp = open(args[0], "r")
                 fcontent = fp.read()
                 fp.close()
-                
+
                 t = TagStripper()
-                print t.clean(t.strip_tags(fcontent))
+                print t.strip_tags(fcontent)
     else:
         TagStripper(
             indir=options.input,

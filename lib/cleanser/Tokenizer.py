@@ -1,7 +1,5 @@
 """Tokenizer"""
-import sys
 import os
-import re
 import string
 
 __version__ = "1.0"
@@ -18,17 +16,22 @@ class Tokenizer:
                     print "Processing: %s" % (f)
                 fp = open(os.path.join(indir, f), "r")
                 content = fp.read()
-                fp.close()                
+                fp.close()
                 content  = self.tokenize(content)
                 if outdir and content:
                     fp = open(os.path.join(outdir, f), "w")
                     fp.write(content)
                     fp.close()
-        
-    def tokenize(self, html):
-        out = html.lower()
+
+    def tokenize(self, content):
+        """Tokenize the given string"""
+        # 1. Convert to lowercase
+        out = content.lower()
+        # 2. Remove all punctuations !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~
         out = out.translate(None, string.punctuation)
-        return out.strip()
+        # 3. Make tokens - remove multiple spaces and lines
+        out = string.join(string.split(out))
+        return out
 
 if __name__ == "__main__":
     _storage = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../storage'))
@@ -47,7 +50,7 @@ if __name__ == "__main__":
                 fp = open(args[0], "r")
                 content = fp.read()
                 fp.close()
-                
+
                 t = Tokenizer()
                 print t.tokenize(content)
     else:
