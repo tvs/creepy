@@ -1,7 +1,7 @@
 = Creepy
 
 == DESCRIPTION
-Creepy is a simple search engine written in Python. It will be developed in four stages: (i) web crawler; (ii) data cleanser; (iii) indexer; and (iv) query processor. Each of the stages are defined by components, some of which are accessible through the Creepy interface, some of which are standalone components.
+Creepy is a simple search engine. It will be developed in four stages: (i) web crawler; (ii) data cleanser; (iii) indexer; and (iv) query processor. Each of the stages are defined by components, some of which are accessible through the Creepy interface, some of which are standalone components.
 
 == RUNNING
 <tt>$ creepy.py [options] <arguments></tt>
@@ -60,9 +60,9 @@ XML Validation
 
 * Python 2.6.1
 * Ruby 1.8.7 or higher
-** Gem: hpricot
-** Gem: builder
-** Gem: libxml-ruby
+ * Gem: hpricot
+ * Gem: builder
+ * Gem: libxml-ruby
 * libxml2
 
 == LOCATION
