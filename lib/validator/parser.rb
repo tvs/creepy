@@ -3,6 +3,7 @@ module Parser
   class XML_Comment_Error < Exception; end
   class XML_PI_Error < Exception; end
   class XML_Reserved_Name < Exception; end
+  class XML_Generic_Error < Exception; end
   class XML_Syntax_Error < Exception; end
   class XML_Document_Empty < Exception; end
   class XML_Unknown_Version < Exception; end
@@ -611,20 +612,75 @@ module Parser
     # mixed-content declaration. 
     #
     # returns: the list of the xmlElementContentPtr describing the element choices
+    # TODO: xmlNewDocElementContent
     def xmlParseElementMixedContentDecl()
       ret = nil
+      current = nil
+      elem = nil
       if (cmp('#PCDATA'))
         skip(7)
         skip_blanks
         
         if (cur == ')')
           skip
-          ret = xmlNewDocElementContent()
+          ret = xmlNewDocElementContent(nil, :pcdata)
+          return nil if ret.nil?
+          if (cur == '*')
+            ret.ocur = :mult
+            skip
+          end
+          return ret
+        end
+        if (cur == '(' || cur == '|')
+          ret = current = xmlNewDocElementContent(nil, :pcdata)
           return nil if ret.nil?
         end
-        
+        while (cur == '|')
+          skip
+          ret = xmlNewDocElementContent(nil, :or) if elem.nil?
+          return nil if ret.nil?
+          
+          ret.c1 = current
+          if (!current.nil?)
+            current.parent = ret
+            current = ret
+          else
+            n = xmlNewDocElementContent(nil, :or)
+            return nil if n.nil?
+            n.c1 = xmlNewDocElementContent(elem, :element)
+            n.c1.parent = n if !n.c1.nil?
+
+            current.c2 = n
+            n.parent = current if !n.nil?
+            
+            current = n
+          end
+          skip_blanks
+          elem = xmlParseName()
+          if elem.nil?
+            raise XML_Syntax_Error, "Name expected"
+            return nil
+          end
+          skip_blanks
+        end
+        if (cur == ')' && nxt(1) == '*')
+          if (!elem.nil?)
+            current.c2 = xmlNewDocElementContent(elem, :element)
+            current.c2.parent = current if !current.c2.nil?
+          end
+          
+          ret.ocur = :mult if (!ret.nil?)
+          skip(2)
+        else
+          raise XML_Generic_Error, "Mixed not started!"
+          return nil
+        end
+      else
+        raise XML_Syntax_Error, "PCData required"
       end
+      return ret
     end
+    
     
   end
   

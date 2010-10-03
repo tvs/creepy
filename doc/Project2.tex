@@ -52,20 +52,32 @@ The main goal of this project is to design and implement data preparation or dat
 In this project, \emph{Creepy} is designed to prepare the document collection that was crawled by the crawler for the further stages of the search engine \emph{i.e.} cleanse documents. The documents crawled by the crawler are typically not in a plain text. Instead, most of them are in HTML format and can also be in other well know formats like Word, Powerpoint, PDF etc. These documents needs to be convert into text plus some metadata for the further stage of the search engine. In project 1, we tweaked our crawler to crawl documents that are in plain text or HTML format only. Conversion of other formats to plain text is rather complicated and is beyond the scope of this project.    
 
 \begin{figure}[htb]
-	\centering
-	\includegraphics[trim=0.0in 2.00in 0.0in 0.0in, clip, page=1]{figures.pdf}
-	\caption{Data Cleansing}
-	\label{fig:data_cleansing}
+ \centering
+ \includegraphics[trim=0.0in 2.00in 0.0in 0.0in, clip, page=1]{figures.pdf}
+ \caption{Data Cleansing}
+ \label{fig:data_cleansing}
 \end{figure}
 
 The task of data cleansing process is to take the collection of documents already crawled by the crawler and convert them into sequence of text \emph{tokens} for the indexer component of the search engine. The cleansing process will generate the cleansed document through a combined process of (i) tag-stripping, (ii) tokenizing, (iii) stopping, and (iv) stemming as illustrated in the figure~\ref{fig:data_cleansing}.
 
 \section{XML Document Graph}
+The first step in creating our XML document graph was to construct a document type definition (DTD) to base it off. The first few elements of the DTD were practically a given: (i) we need an element that will carry all of the documents as children, this we called \texttt{docstore}; and (ii) we need an element for storing the document information, fittingly, we named this one \texttt{doc}.
+
+The design decisions after that were predominantly guided by the amount of information we needed. In order to create a graph structure, each document needed to have fields for tracking which documents linked to it and which documents are linked from it. However, we did not really need the full document descriptions of those links. Instead, all we needed were the document's URLs and their IDs (the filename on the local system). As such, we chose to create these elements as a list, where their children were very simple entities with a pair of attributes (URL and ID) and nothing more. As such, \texttt{to} and \texttt{from} contain a list of \texttt{page}s.
+
+Creating the graph itself was not terribly complex. For this component, named \emph{Rucksack}, I chose to use Ruby, being most comfortable with it and needing to complete it quickly. The majority of the work is done in the \texttt{DocStore} class, where it imports a map-file (\texttt{pid\_map.dat}) and creates the structure of \texttt{Doc} and \texttt{Page} classes. In the interest of saving memory with larger map files, each structure is created only once and stored within a hash based on its URL. As the map is rigged together or as entities are fully defined, it simply updates the fields.
+
+Finally, each class is given a \texttt{\#to\_xml} method that utilizes Ruby's \emph{Builder} Gem (library). This means that each component can be converted directly into an XML description individually. The overall construction of the DTD-compliant structure is handled by \texttt{DocStore\#to\_xml}.
+
+In the interest of verifying that components worked, there were two small testing scripts written for \texttt{Doc} and \texttt{DocStore}. While not terribly in-depth, they helped to smooth out several bugs with the map-rigging and the XML construction.
 
 \section{XML Validator}
+In order to make sure \emph{Rucksack} created a valid tree based on our DTD, we wanted to write a XML-validator for doing so. Unfortunately, this process is extremely complex. While efforts were made to create a validator (which can be seen under \texttt{lib/validator/parser.rb}) the task was simply too large to complete in the remaining time. For comparison, \emph{libxml2}, a standard and popular C library for handling XML, and also the library that most validators wind up utilizing (for example \emph{libxml-ruby} and \emph{libxml2} for Python, PHP, and Perl), took 15,000 lines just for validating the XML syntax alone (which included parsing DTD/Doctype declarations but not constructing the tree). The actual DTD validation added another 7,000 lines on top of that.
+
+Our implementation in Ruby will validate a small portion of the XML syntax, however due to time constraints it was not possible to complete the full validator. Instead, so that we could still make sure \emph{Rucksack} was constructing XML that was valid by our DTD, we leveraged \emph{libxml} and a set of bindings for Ruby to complete the validation. This can be seen in \emph{validate.rb} at the top level of the project.
 
 \section{Tag-stripping}
-The first task in data cleansing process is to recognize the structural elements of the document and remove them. This process is referred to as \emph{tag-stripping}. Document structure is often specified by a markup language, for example HTML is used for specifying the structure of web pages. The tag-stripping component uses knowledge of the syntax of the HTML language to identify the structure of the document. In HTML, \emph{tags} are used to define document elements. These tags does not add any value for the search engine and they are removed at this stage. There is two types of tag stripping (i) aggressively; and (ii) \emph{individually}; that can be applied to the document collection. Tag-stripping is performed on the document collection that is crawled by the crawler.
+The first task in the data cleansing process is to recognize the structural elements of the document and remove them. This process is referred to as \emph{tag-stripping}. Document structure is often specified by a markup language, for example HTML is used for specifying the structure of web pages. The tag-stripping component uses knowledge of the syntax of the HTML language to identify the structure of the document. In HTML, \emph{tags} are used to define document elements. These tags does not add any value for the search engine and they are removed at this stage. There is two types of tag stripping (i) aggressively; and (ii) \emph{individually}; that can be applied to the document collection. Tag-stripping is performed on the document collection that is crawled by the crawler.
 
 \subsection{Aggressive tag-stripping} 
 Aggressive tag-stripping removes the whole HTML element \emph{i.e.} removes tags and its content. There are certain tags in HTML page that is used only for structural purpose or for dynamic scripting only. These HTML elements can be removed fully since it does not contribute any relevant information for the search. For example, \verb|<script type="text/javascript">functionCall();</script>| would be fully removed by the tag-stripping component. We selected following HTML tags that are aggressively removed from the document: script, style, object, embed, applet, noframes, and noscript. 
@@ -194,14 +206,49 @@ The process for generating cleanse document is sequential as illustrated in the 
 	creepy$ python creepy.py -S storage -c seed.txt -T 2500 -N 300
 	\end{verbatim}
 	
+	\item XML Document Graph
+	Rucksack requires two RubyGems be installed (both of which come standard with later versions of Ruby):
+	\begin{verbatim}
+	  $ gem install hpricot
+	  $ gem install builder
+	\end{verbatim}
+	For default options:
+	\begin{verbatim}
+	  $ ruby rucksack.rb pid_map.dat
+	\end{verbatim}
+	For the current production environment:
+	\begin{verbatim}
+	  $ ruby rucksack.rb -a crawled storage/pid_map.dat -o map.xml
+	\end{verbatim}
+	
+	\item Validation
+	The validator requires one RubyGem be installed, as well as libxml and zlib.
+	On OS X with MacPorts installed, libxml and zlib can be installed with:
+	\begin{verbatim}
+	  $ port install libxml2
+	\end{verbatim}
+	On Debian linux:
+	\begin{verbatim}
+	  $ apt-get install libxml2 libxml2-dev
+	\end{verbatim}
+	Installing libxml-ruby:
+	\begin{verbatim}
+	  $ gem install libxml-ruby
+	\end{verbatim}
+	Running:
+	\begin{verbatim}
+	  $ ruby validate.rb <dtd_file> <xml_file>
+	\end{verbatim}
+	
+	
 	\item Tag-stripping
 	\begin{verbatim} 
-	creepy$ python creepy.py -S storage -s 
+	   $ python creepy.py -S storage -s 
 	\end{verbatim}
 	
 	\item Tokenizing
 	\begin{verbatim} 
-	creepy$ python creepy.py -S storage -t 
+	   $ python creepy.py -S storage -t 
 	\end{verbatim}
 	
 	\item Stopping
