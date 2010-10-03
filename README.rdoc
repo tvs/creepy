@@ -1,25 +1,40 @@
 = Creepy
 
 == DESCRIPTION
-Creepy is a web crawler written in Python that reads in a list of seeds and branches out from there, scavenging the web until it has collected some specified number of webpages.
+Creepy is a simple search engine written in Python. It will be developed in four stages: (i) web crawler; (ii) data cleanser; (iii) indexer; and (iv) query processor.
 
 == RUNNING
-<tt>$ creepy.py [options] <seed></tt>
+<tt>$ creepy.py [options] <arguments></tt>
+
+Creepy Search Engine
 
 Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -v, --verbose         Verbose Output [default: False]
   -d, --debug           Debug Mode [default: False]
-  -O STORAGE, --output=STORAGE
-                        Output location for stored files [default:
-                        /Users/trhall/Schoolwork/webdata/creepy/storage/]
-  -T THRESHOLD, --page_threshold=THRESHOLD
-                        Max. number of pages to crawl [default: 10]
-  -N NUM_THREADS, --num_threads=NUM_THREADS
+  -S STORAGE, --storage=STORAGE
+                        Data Storage location [default: ./storage/]
+  -C, --clean_start     Start clean by deleting existing storage location
+                        [default: False]
+
+  Web Crawler:
+    Crawling the Web: Takes set of seed urls and start crawling the web
+    and stores the pages in the storage location.
+
+    -c <seeds | seedfile>, --crawl=<seeds | seedfile>
+                        Crawl the web
+    -T THRESHOLD, --page_threshold=THRESHOLD
+                        Max. number of pages to crawl [default: 2500]
+    -N NUM_THREADS, --num_threads=NUM_THREADS
                         Number of threads to use [default: 1]
-  -C, --clean_start     Start clean by deleting old storage location [default:
-                        False]
+
+  Data Cleanser:
+    Data Preparation/Cleansing: Reads pages stored by the crawler and
+    perform requested actions.
+
+    -s, --strip_tags    HTML Tag Stripping
+    -t, --tokenize      Tokenize the document
 
 == REQUIRES
 
