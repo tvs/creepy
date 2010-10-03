@@ -6,7 +6,7 @@ Creepy is a simple search engine. It will be developed in four stages: (i) web c
 == RUNNING
 <tt>$ creepy.py [options] <arguments></tt>
 
-Creepy Search Engine
+*Creepy Search Engine*
 
 Options:
   --version             show program's version number and exit
@@ -37,7 +37,7 @@ Options:
     -t, --tokenize      Tokenize the document
 
 
-XML Document Graph
+*XML Document Graph*
 
 
 <tt>$ rucksack.rb [options] <pid_map file></tt>
@@ -51,7 +51,7 @@ Options:
       --delimiter DEL              pid_map uses a delimiter DEL to separate URL and ID
                                     Default: "=>"
 
-XML Validation
+*XML Validation*
 
 
 <tt>$ validate.rb <dtd_file> <xml_file></tt>
