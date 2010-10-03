@@ -3,6 +3,7 @@
 \usepackage[margin=1.0in]{geometry}
 \usepackage{fancyhdr, lastpage}
 \usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
 \pdfinfo{
    /Author (Travis Hall, Brittany Thompson and Bhadresh Patel) 
    /Title (Creepy - Project Report)
@@ -75,6 +76,10 @@ In the interest of verifying that components worked, there were two small testin
 In order to make sure \emph{Rucksack} created a valid tree based on our DTD, we wanted to write a XML-validator for doing so. Unfortunately, this process is extremely complex. While efforts were made to create a validator (which can be seen under \texttt{lib/validator/parser.rb}) the task was simply too large to complete in the remaining time. For comparison, \emph{libxml2}, a standard and popular C library for handling XML, and also the library that most validators wind up utilizing (for example \emph{libxml-ruby} and \emph{libxml2} for Python, PHP, and Perl), took 15,000 lines just for validating the XML syntax alone (which included parsing DTD/Doctype declarations but not constructing the tree). The actual DTD validation added another 7,000 lines on top of that.
 
 Our implementation in Ruby will validate a small portion of the XML syntax, however due to time constraints it was not possible to complete the full validator. Instead, so that we could still make sure \emph{Rucksack} was constructing XML that was valid by our DTD, we leveraged \emph{libxml} and a set of bindings for Ruby to complete the validation. This can be seen in \emph{validate.rb} at the top level of the project.
+
+In retrospect, starting the parser from the bottom-up would have made for a less daunting approach. Establishing the terminals and then moving upwards into the non-terminals would have allowed more flexibility in the code. Unfortunately, as my first parser, I did not have enough experience to recognize this.
+
+For reference, the XML 1.0 language description used can be found here: \url{http://www.w3.org/TR/REC-xml/}
 
 \section{Tag-stripping}
 The first task in the data cleansing process is to recognize the structural elements of the document and remove them. This process is referred to as \emph{tag-stripping}. Document structure is often specified by a markup language, for example HTML is used for specifying the structure of web pages. The tag-stripping component uses knowledge of the syntax of the HTML language to identify the structure of the document. In HTML, \emph{tags} are used to define document elements. These tags does not add any value for the search engine and they are removed at this stage. There is two types of tag stripping (i) aggressively; and (ii) \emph{individually}; that can be applied to the document collection. Tag-stripping is performed on the document collection that is crawled by the crawler.
