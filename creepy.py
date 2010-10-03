@@ -46,7 +46,7 @@ if __name__ == "__main__":
     _verbose = options.verbose
     _debug = options.debug
     _clean = options.clean_start
-    _storage = options.storage
+    _storage = os.path.realpath(options.storage)
 
     if _clean:
         shutil.rmtree(_storage)
