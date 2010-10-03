@@ -38,16 +38,22 @@ Options:
 
 
 XML Document Graph
+
+
 <tt>$ rucksack.rb [options] <pid_map file></tt>
+
 Options:
 	-o, --output FILE                Output resultant XML to FILE
 	-i, --indent N                   Indent N spaces
                                      Default: 2
-   -a, --append DIR                 Append DIR to the pid_map path
+												
+	-a, --append DIR                 Append DIR to the pid_map path
    	 --delimiter DEL              pid_map uses a delimiter DEL to separate URL and ID
                                      Default: "=>"
 
 XML Validation
+
+
 <tt>$ validate.rb <dtd_file> <xml_file></tt>
 
 == REQUIRES
