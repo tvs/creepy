@@ -1,6 +1,7 @@
 """HTML Tag Stripper"""
 import os
 import re
+import xml.sax.saxutils
 
 __version__ = "1.0"
 __authors__ = "Bhadresh Patel <bhadresh@wsu.edu>"
@@ -34,9 +35,10 @@ class TagStripper:
         try:
             for p in self.patterns:
                 html = p.sub(' ', html)
-        except:
+            html = xml.sax.saxutils.unescape(html) # decode HTML entities            
+        except Exception, e:
             if self.verbose:
-                print "  Error stripping tags"
+                print "  Error stripping tags", e
             pass
         return html
 
