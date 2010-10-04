@@ -199,20 +199,20 @@ At the end of the three step process of tokenizer we save the generated tokens i
 After the web file content is tokenized, it goes through the stopping phase. This phase removes the unnecessary words that add no value to the data. Removing these words ideally shrinks the file to just about half the size it was after tokenizing. I found and implemented in python a stop list that was published in the Journal of Machine Learning Research created by David Lewis in August 2004 that contains 571 stop words \footnote{http://jmlr.csail.mit.edu/papers/volume5/lewis04a/a11-smart-stop-list/english.stop}.
 
 \section{Stemming}
-Stemming is the process of taking the suffix off of words, ie feeding -> feed. This makes it easier for human user input since there are so many ways to use phrase a search. I used and implemented in python the stemming algorithm developed by Martin Porter in July of 1980. This algorithm can be found at http://tartarus.org/~martin/PorterStemmer/def.txt  titled "An algorithm for suffix stripping".  I also used some code segments from Vivake Gupta’s code \footnote{http://tartarus.org/~martin/PorterStemmer/python.txt} to calculate m and find the ending of words.
+Stemming is the process of taking the suffix off of words, \emph{i.e.} feeding $\rightarrow$ feed. This makes it easier for human user input since there are so many ways to use phrase a search. I used and implemented in python the stemming algorithm developed by Martin Porter in July of 1980. This algorithm can be found at http://tartarus.org/~martin/PorterStemmer/def.txt  titled ``An algorithm for suffix stripping''.  I also used some code segments from Vivake Gupta’s code \footnote{http://tartarus.org/~martin/PorterStemmer/python.txt} to calculate m and find the ending of words.
 
 \section{Roles}
 \begin{description}
  \item[Travis Hall] Link analysis graph and XML validator.
  \item[Brittany Thompson] Stopping and stemming.
- \item[Bhadresh Patel] Tag-stripping and tokenizing.
+ \item[Bhadresh Patel] Tag-stripping and tokenizing. Consultation for stopper and stemmer code.
 \end{description}
 
 \section{Test Environment}
 For testing/production purpose, we set up a machine instance on Amazon EC2. The instance id of the machine is \texttt{i-7d1e0d17}. The source code is checked out at \texttt{/home/ubuntu/creepy/}.
 
 \section{Usage Guide}
-The process for generating cleanse document is sequential as illustrated in the figure~\ref{fig:data_cleansing}, so here are the steps for using the program in same sequence.
+The process for generating cleanse document is sequential as illustrated in the figure~\ref{fig:data_cleansing}. Here are the steps for generating cleansed document.
 
 \begin{enumerate}
 	\item Crawl the web	
@@ -264,10 +264,6 @@ The process for generating cleanse document is sequential as illustrated in the 
 	\begin{verbatim} 
 	   $ python creepy.py -S storage -t 
 	\end{verbatim}
-	
-	\item Stopping
-	
-	\item Stemming
 	
 \end{enumerate}
 
