@@ -74,10 +74,14 @@ module Rucksack
     
     def self.get_links(file)
       list = []
-      doc = Hpricot.parse(File.read(file))
-      doc.search("a[@href]").each do |link|
-        list << link.attributes['href']
-      end
+      begin
+        doc = Hpricot.parse(File.read(file))
+        doc.search("a[@href]").each do |link|
+          list << link.attributes['href']
+        end
+      rescue Exception => e
+        $stderr.puts "Oh god error in #{file}"
+      end      
       list
     end
   end
