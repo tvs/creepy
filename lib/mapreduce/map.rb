@@ -15,12 +15,12 @@ STDIN.each_line do |line|
   end
 end
 
-fr = freqs.sort { |a, b| a[0] <=> b[0] }
+fr = freqs.sort
 
 fr.each do |word, doc|
   print "#{word}\t"
   doc.each do |name, freq|
-    print "(#{name}:#{freq})"
+    print "(#{name}:#{freq}) "
   end
   puts ""
 end
