@@ -32,5 +32,5 @@ if ARGV.length == 0
 end
 
 Dir.glob(ARGV[0]+'*').each do |file|
-  File.prepend_line(file, File.basename(file))
+  File.prepend_line(file, "<file="+File.basename(file)+">")
 end
