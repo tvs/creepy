@@ -80,7 +80,10 @@ if __name__ == "__main__":
     
     (options, args) = parser.parse_args()
     
-    initSetup()    
+    print "### Initializing"
+    initSetup()
+    
+    print "### Creating job flow"
     conn = boto.connect_emr()
     steps = [addStep(iteration) for iteration in range(options.steps)]
     jobid = conn.run_jobflow(
@@ -107,17 +110,18 @@ if __name__ == "__main__":
                 if s.state != u'COMPLETED':
                     break
             status = "%d/%d" % (i + 1, len(jf.steps))
-            print "[%-10s] %s %s" % (time.strftime('%H:%M:%S'), jf.state, status)
+            print "[%s] %s %s" % (time.strftime('%H:%M:%S'), jf.state, status)
             
             if i + 1 == len(jf.steps):            
+                print "### Checking for convergence"
                 if converged(len(jf.steps), options.convergence):
                     completed = True
                 else:
-                    steps = [addStep(iteration) for iteration in range(options.steps)]
-                    print "### Adding more steps"
+                    print "### Adding more steps to job flow", jobid
+                    steps = [addStep(iteration) for iteration in range(iteration + 1, iteration + 1 + options.steps)]
                     conn.add_jobflow_steps(jobid, steps)
         else:
-            print "[%-10s] %s" % (time.strftime('%H:%M:%S'), jf.state)
+            print "[%s] %s" % (time.strftime('%H:%M:%S'), jf.state)
         
     print "### Terminating job flow", jobid
     conn.terminate_jobflow(jobid)
