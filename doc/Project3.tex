@@ -65,11 +65,22 @@ For project 2, we used the Map-Reduce paradigm developed by Google for web crawl
 \section{Indexing}
 After the stopping and stemming is complete, the indexer is then ran to catalog all the terms in every document. The indexer is written in python and uses an inverted list structure similar to the indices in the back of textbooks. I used a nested dictionary to hold the list of terms and with each term is attached a list of pages and the occurrences of that term.  On the test documents that I used, the output looks something like this:
 {..., 'international': {'3testPage.txt': 1, '4testPage.txt': 1, '5testPage.txt': 1}, 'security': {'3testPage.txt': 11, '4testPage.txt': 2}, ...}
-where the term is listed along with the page that it is found on and the number of times it appears on that page.  
+where the term is listed along with the page that it is found on and the number of times it appears on that page.
+
+\section{MapReduce Indexing}
+While the previous indexer certainly works when run on a single machine, it runs into trouble when being distributed. Since our document corpus can become quite large, we clearly needed a way to distribute the creation of our indices: this is where MapReduce comes in.
+
+One of the first things that was required for doing MapReduce was some extra processing done to the files. Since the way MapReduce works is to simply stream the file into the mapper's STDIN, we needed to find a way to tag the file with its ID. Fortunately, since all the files had, at this point, been processed and stopped and stemmed, we knew that there would not be any HTML (or XML)-like tags still within the document. The obvious answer to tagging was then to simply introduce a new tag as the first line of the document: \texttt{$<$file=[filename]$>$}. We also needed to ensure that there's a newline character at the end of each file so that when processing we only had to run a regular expression on each line instead of each word individually. All this is done in \texttt{prep\_data.rb}. Obviously, doing this required a bit of extra processing time, so ideally this would be implemented into Creepy-proper and the tags written as everything else is.
+
+Then the mapper (\texttt{lib/mapreduce/map.rb}) and Reducer (\texttt{lib/mapreduce/reduce.rb}) are fairly straight forward. Whenever the mapper sees a line containing the tag, it considers all input between that line and the next occurrence of the tag as belonging to the indicated document. From there, it simply breaks up the lines into the individual words and tallies up a count. Once completed, it outputs the various words with its list of occurrences (and their various document-based tallies) that will get sorted and fed to the reducer.
+
+The reducer simply takes the input from the mapper and creates another hash, mapping words to $(document:occurrence)$ pairs. It also maintains a cumulative tally this time. Finally, it sorts the hash alphabetically by key (word) and outputs in a format identical to the assignment document.
+
+Running this through MapReduce was done in the same way as we did for homework three. In this case, the processed copies of the documents were uploaded to S3 and then the whole process was started via SSH into WSUV's CS server. Once completed. The resulting partial-indices can then be merged, split, or updated as needed in the future.
 
 \section{Roles}
 \begin{description}
- \item[Travis Hall] 
+ \item[Travis Hall] MapReduce indexing,
  \item[Brittany Thompson] Indexing
  \item[Bhadresh Patel] Basic PageRank, MapReduce PageRank, script to run MapReduce PageRank iteratively until convergence.
 \end{description}
