@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """PageRank Calculation"""
+
 import sys
 from lxml import etree
 import os
@@ -27,9 +28,9 @@ class PageRank:
             pages[p] = {}
             pages[p]['in'] = tree.xpath("//doc[@id='%s']/from/page/@id" % p) # Inbound Links
             pages[p]['out'] = tree.xpath("//doc[@id='%s']/to/page/@id" % p) # Outbound Links
-        
+
         ni = 0
-        self.printRanks(ni, ranks)
+        self.print_ranks(ni, ranks)
         rdiff = self.convergence * 2
         while rdiff > self.convergence:
             ni = ni + 1
@@ -47,10 +48,10 @@ class PageRank:
                 if (diff > rdiff):
                     rdiff = diff
                 newranks[p] = nr
-            
+
             ranks = newranks.copy()
-            self.printRanks(ni, ranks)
-            
+            self.print_ranks(ni, ranks)
+
         if output:
             fp = open(output, "w")
             for docid, pagerank in ranks.iteritems():
@@ -58,7 +59,8 @@ class PageRank:
             fp.close()
 
         if self.verbose:
-            print "\nTop 10 pages:"
+            print "\n# of iterations:", ni
+            print "Top 10 pages:"
             toppages = sorted(ranks.iteritems(), key=lambda(docid, rank): (-rank, docid))[:10]
             print "-" * 60
             print "%4s\t%-32s\t%s" % ("#", "Page ID", "PageRank")
@@ -66,9 +68,9 @@ class PageRank:
             for n, (docid, rank) in enumerate(toppages):
                 print "%4s\t%-32s\t%f" % (n + 1, docid, rank)
             print "-" * 60
-    
-    def printRanks(self, i, ranks):
-        if self.verbose:
+
+    def print_ranks(self, i, ranks):
+        if self.verbose > 1:
             keys = sorted(ranks.keys())
             if i == 0:
                 print "-" * (11 + 16 * len(keys))
@@ -88,14 +90,17 @@ class PageRank:
         if output and os.path.isfile(output):
             print "Invalid output location, it is a existing file"
             return
-            
+        if not os.path.isfile(linkmap):
+            print "linkmap file does not exits"
+            return
+
         if os.path.isdir(output):
             import shutil
             shutil.rmtree(output)
         os.makedirs(output)
         tree = etree.parse(linkmap)
         documents = tree.xpath("//doc/@id")
-        initial_rank = 1.0 # Initial Rank                   
+        initial_rank = 1.0 # Initial Rank
         fp = None
         n = 0
         for docid in documents:
@@ -107,7 +112,7 @@ class PageRank:
             if len(outlinks) > 0:
                 n = n + 1
                 fp.write("%s\t%s\t%s\n" % (docid, initial_rank, ",".join(outlinks)))
-        
+
     def mapper(self):
         """Mapper code for MapReduce PageRank Calculation"""
         for line in sys.stdin:
@@ -133,7 +138,19 @@ class PageRank:
         for docid, links in outlinks:
             pr = (1.0 - self.damping_factor) + (self.damping_factor * ranksum.get(docid, 0))
             print "%s\t%s\t%s" % (docid, pr, links)
-            
+
+    def final_mapper(self):
+        """Final Mapper code"""
+        for line in sys.stdin:
+            (docid, pr, outlinks) = line.strip().split('\t')
+            print "%s\t%s" % (docid, pr)
+
+    def final_reducer(self):
+        """Final Reducer code"""
+        for line in sys.stdin:
+            (docid, pr) = line.strip().split('\t')
+            print "%s:%s" % (docid, pr)
+
 if __name__ == "__main__":
     _storage = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../storage'))
     import optparse
@@ -148,11 +165,17 @@ if __name__ == "__main__":
     parser.add_option('-p', '--prepare_data', help="Prepare Data for MapReduce PageRank Calculation", metavar="LINKMAP")
     parser.add_option('-m', '--mapper', help="Run Mapper code for MapReduce PageRank", action="store_true")
     parser.add_option('-r', '--reducer', help="Run Reducer code for MapReduce PageRank", action="store_true")
+    parser.add_option('-f', '--final', help="Run final step code", action="store_true")
 
     (options, args) = parser.parse_args()
     p = PageRank(damping_factor=options.damping, convergence=options.convergence, verbose=options.verbose)
-    
-    if options.mapper:
+
+    if options.final:
+        if options.mapper:
+            p.final_mapper()
+        elif options.reducer:
+            p.final_reducer()
+    elif options.mapper:
         p.mapper()
     elif options.reducer:
         p.reducer()
