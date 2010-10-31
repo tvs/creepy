@@ -5,6 +5,7 @@
 tmp/*
 bin/*
 log/*.log
+indexing/*
 
 # Data storage folder
 storage/*

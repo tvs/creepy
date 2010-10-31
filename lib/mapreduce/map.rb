@@ -7,7 +7,7 @@ STDIN.each_line do |line|
   if line =~ /<file=([a-zA-Z0-9]*)>/ 
     doc = $1
   else
-    words = line.split()
+    words = line.split(' ')
     words.each do |word|
       freqs[word] = Hash.new(0) unless freqs.has_key?(word)
       freqs[word][doc] += 1

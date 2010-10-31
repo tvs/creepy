@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 class Word
+  attr_reader :count
   def initialize(word)
     @word = word
     @docs = Hash.new(0)
@@ -35,6 +36,7 @@ STDIN.each_line do |line|
   end
 end
 
+#freqs.sort { |a, b| a[1].count <=> b[1].count }.reverse.each do |item|
 freqs.sort.each do |item|
   puts item[1].to_s
 end

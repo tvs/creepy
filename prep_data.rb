@@ -33,4 +33,8 @@ end
 
 Dir.glob(ARGV[0]+'*').each do |file|
   File.prepend_line(file, "<file="+File.basename(file)+">")
+  # Also had to add a newline to the end of the file otherwise cat would
+  # run the lines into one another and map() would have failed to get
+  # the extra lines with all of the relevant words
+  open(file, 'a') { |f| f.puts "\n" }
 end
