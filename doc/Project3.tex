@@ -63,11 +63,14 @@ For project 2, we used the Map-Reduce paradigm developed by Google for web crawl
 \section{PageRank}
 
 \section{Indexing}
+After the stopping and stemming is complete, the indexer is then ran to catalog all the terms in every document. The indexer is written in python and uses an inverted list structure similar to the indices in the back of textbooks. I used a nested dictionary to hold the list of terms and with each term is attached a list of pages and the occurrences of that term.  On the test documents that I used, the output looks something like this:
+{..., 'international': {'3testPage.txt': 1, '4testPage.txt': 1, '5testPage.txt': 1}, 'security': {'3testPage.txt': 11, '4testPage.txt': 2}, ...}
+where the term is listed along with the page that it is found on and the number of times it appears on that page.  
 
 \section{Roles}
 \begin{description}
  \item[Travis Hall] 
- \item[Brittany Thompson] 
+ \item[Brittany Thompson] Indexing
  \item[Bhadresh Patel] Basic PageRank, MapReduce PageRank, script to run MapReduce PageRank iteratively until convergence.
 \end{description}
 
