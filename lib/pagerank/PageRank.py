@@ -109,7 +109,7 @@ class PageRank:
                 fp.write("%s\t%s\t%s\n" % (docid, initial_rank, ",".join(outlinks)))
         
     def mapper(self):
-        """Mapper code for MapReduce PageRank"""
+        """Mapper code for MapReduce PageRank Calculation"""
         for line in sys.stdin:
             (docid, pr, outlinks) = line.strip().split('\t')
             outlinks = outlinks.split(',')
@@ -119,7 +119,7 @@ class PageRank:
                 print "%s\t%s" % (p, npr)
 
     def reducer(self):
-        """Reducer code for MapReduce PageRank"""
+        """Reducer code for MapReduce PageRank Calculation"""
         ranksum = {}
         outlinks = {}
         for line in sys.stdin:
@@ -129,7 +129,8 @@ class PageRank:
             else:
                 ranksum[docid] = ranksum.get(docid, 0) + float(value)
 
-        for docid, links in outlinks.iteritems():
+        outlinks = sorted(outlinks.items())
+        for docid, links in outlinks:
             pr = (1.0 - self.damping_factor) + (self.damping_factor * ranksum.get(docid, 0))
             print "%s\t%s\t%s" % (docid, pr, links)
             
