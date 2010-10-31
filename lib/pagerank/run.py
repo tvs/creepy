@@ -33,7 +33,7 @@ def initSetup():
 def converged(n, convergence):
     if n < 2:
         return True
-    tmp = os.path.realpath(os.path.join(os.path.dirname(__file__), 'tmp'))
+    tmp = os.path.realpath(os.path.join(os.path.dirname(_output), 'tmp'))
     if os.path.isdir(tmp):
         shutil.rmtree(tmp)    
     os.makedirs(tmp)
