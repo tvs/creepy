@@ -152,20 +152,27 @@ For testing/production purpose, we set up a machine instance on Amazon EC2. The 
 \begin{itemize}
 	\item To calculate PageRank sequentially using link map
 \begin{verbatim}
-	$./lib/pagerank/PageRank -l linkmap.xml
+	$ ./lib/pagerank/PageRank -l linkmap.xml
 \end{verbatim}
 
 	\item Prepare data for MapReduce PageRank calculation
 \begin{verbatim}
-	$./lib/pagerank/PageRank.py -p storage/links.xml
+	$ ./lib/pagerank/PageRank.py -p storage/links.xml
 \end{verbatim}
 	
 	\item Run MapReduce PageRank iteratively until convergence (boto and s3cmd is required to run this script)
 \begin{verbatim}
-	$./lib/pagerank/run.py -c 0.0000001 -n 5
+	$ ./lib/pagerank/run.py -c 0.0000001 -n 5
 \end{verbatim}
 \end{itemize}
 
-%\subsection{Indexing}
+\subsection{Indexing}
+\begin{itemize}
+   \item To run the Mapper and Reducer without utilizing the Cloud
+   \begin{verbatim}
+$ cat [corpus directory]/* | ./map.rb | sort | ./reduce.rb
+   \end{verbatim}
+   \item Running over the Cloud is handled in the same manner as homework three (using the supplied scripts with the necessary changes).
+\end{itemize}
 
 \end{document}
